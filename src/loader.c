@@ -1231,13 +1231,16 @@ static int ldr_split_xml_line(char **login, char **ciphertext,
 #ifdef HAVE_MPI
 		if (mpi_id == 0)
 #endif
-		fprintf(stderr,
+
+		/*fprintf(stderr,
 		    "Warning: detected hash type \"%s\", but the string is "
 		    "also recognized as \"%s\"\n"
 		    "Use the \"--format=%s\" option to force loading these "
 		    "as that type instead\n",
 		    (*format)->params.label, alt->params.label,
-		    alt->params.label);
+		    alt->params.label);*/
+                    ;
+
 #endif
 	} while ((alt = alt->next));
 

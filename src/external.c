@@ -331,7 +331,7 @@ void do_external_crack(struct db_main *db)
 				continue;
 		}
 
-#ifdef HAVE_MPI
+#ifdef HAVE_MPI                
 		// MPI distribution
 		if (mpi_line++ % mpi_p != mpi_id) continue;
 #endif

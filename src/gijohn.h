@@ -2,6 +2,7 @@
 /* MAX PLAINTEXT LENGTH FOR BUFFER SIZE */
 #define MAX_WORD  64
 #define DOWNLOADSIZE 1024*1024
+#define GIJOHN_HASHES			"johnresult_hash.xml"
 
 char *inpFileIncremental;
 char *inpFileHashes;

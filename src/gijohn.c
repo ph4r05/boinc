@@ -16,12 +16,23 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#ifndef _MSC_VER
 #include <unistd.h>
+#include <sys/file.h>
+#else
+#include <io.h>
+#pragma warning ( disable : 4996 )
+#define S_IRUSR _S_IREAD
+#define S_IWUSR _S_IWRITE
+#endif
+
 #include <stdlib.h>
 #include <netdb.h>
 #include <errno.h>
 #include <string.h>
 #include <termios.h>
+#include <fcntl.h>
 
 #include "formats.h"
 #include "options.h"
@@ -29,6 +40,9 @@
 #include "gijohn.h"
 #include "loader.h"
 #include "compiler.h"
+#ifdef HAVE_MPI
+#include "john-mpi.h"
+#endif
 
 /* external.c inside plaintext */
 extern c_int ext_word[PLAINTEXT_BUFFER_SIZE];
@@ -113,6 +127,7 @@ void init_external(char *charset_ex, int charsetl_ex, char *fword, char *lword)
 {
 	int i;
         char tword[32];
+        FILE * fd;
 
 	modulo = 0;
 	minlength = length = strlen(fword);
@@ -138,6 +153,11 @@ void init_external(char *charset_ex, int charsetl_ex, char *fword, char *lword)
         // compute modulo
 	update_words(fword, tword, length);
 
+        // empty output file for hashes
+        if ((fd = fopen(GIJOHN_HASHES, "w+"))!=NULL){
+            fclose(fd);
+        }
+        
 	first_time = 1;
 }
 
@@ -652,6 +672,7 @@ void getxml2(int sd, char **xml, char *what, char *where, int port, int verbose,
 	char buf[DOWNLOADSIZE];
 	int actsize = DOWNLOADSIZE;
 	int count = 0;
+        int bodyNow=0;
 
 	if ((*xml = malloc(sizeof(char)*actsize)) == NULL)
 	{
@@ -669,8 +690,6 @@ void getxml2(int sd, char **xml, char *what, char *where, int port, int verbose,
 	setbuf(stream, NULL);
 	/* lighttpd doesnt likes the rfc? :'( */
 	fprintf(stream, "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n", what, where);
-        int bodyNow=0;
-        
 	while(fgets(buf, DOWNLOADSIZE, stream))
 	{
 		count += strlen(buf);
@@ -1083,13 +1102,33 @@ void sendtheresults()
 			sleep(SLEEP_TIME);
 		}
             } else {
-                FILE * file;
+                //FILE * file;
+                int fd;
+/*      
+#ifdef HAVE_MPIXXX
+                char fname[255];
+                sprintf(fname, "johnresult_%02d.xml", mpi_id);
+                if ((file=fopen(fname, "w+"))!=NULL){    
+#else 
+                if ((file=fopen("johnresult.xml", "w+"))!=NULL){    
+#endif                  
+*/
                 printf("Using direct file. Stdouting... %s", post);
                 
-                if ((file=fopen("johnresult.xml", "w+"))!=NULL){
-                    fprintf(file, "%s", post);
-                    fclose(file);
+                if ((fd = open(path_expand(GIJOHN_HASHES),
+                        O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR)) < 0)
+                        pexit("open: %s", path_expand(GIJOHN_HASHES));
+                
+                {    
                     
+#if defined(LOCK_EX) && OS_FLOCK
+                    if (flock(fd, LOCK_EX)){ close(fd); continue; }
+#endif
+                    if (write_loop(fd, post, strlen(post)) < 0) pexit("write");;
+#if defined(LOCK_EX) && OS_FLOCK
+                    if (flock(fd, LOCK_UN)) { close(fd); break; }
+#endif
+                    if (close(fd)) pexit("close");
                     printf("[+] Dumped to file johnresult.xml\n");
                 }
             }
