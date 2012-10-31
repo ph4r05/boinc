@@ -27,7 +27,10 @@
 #undef index
 #endif
 
-static struct db_main *crk_db;
+extern void setcrackedhash(char *key, char *hash);
+
+struct db_main *crk_db;
+
 static struct fmt_params crk_params;
 static struct fmt_methods crk_methods;
 static int crk_key_index, crk_last_key;
@@ -164,8 +167,8 @@ static int crk_process_guess(struct db_salt *salt, struct db_password *pw,
 	crk_timestamps[index] = status.crypts;
 
 	repkey = key = crk_methods.get_key(index);
-	replogin = pw->login;
-
+	replogin = pw->login;        
+        
 	if (options.store_utf8 || options.report_utf8) {
 		if (options.utf8)
 			utf8key = key;
@@ -188,6 +191,8 @@ static int crk_process_guess(struct db_salt *salt, struct db_password *pw,
 		if (options.store_utf8)
 			key = utf8key;
 	}
+        
+        if (options.flags & FLG_GIJOHN_CHK) setcrackedhash(key, pw->source);
 
 	// Ok, FIX the salt  ONLY if -regen-lost-salts=X was used.
 	if (options.regen_lost_salts) {

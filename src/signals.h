@@ -48,7 +48,7 @@ extern void sig_timer_emu_tick(void);
  * Installs the signal handlers.
  */
 extern void sig_init(void);
-
+extern void sig_done(void);
 /*
  * Terminates the process if event_abort is set.
  */

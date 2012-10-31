@@ -45,6 +45,8 @@
 #if defined(HAVE_CUDA)
 extern int cuda_gpu_id;
 #endif
+#include "gijohn.h"
+
 
 struct options_main options;
 static char *field_sep_char_string;
@@ -141,6 +143,21 @@ static struct opt_entry opt_list[] = {
 		"%u", &options.max_run_time},
 	{"regen-lost-salts", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
 		"%u", &options.regen_lost_salts},
+                
+        {"gijohn", FLG_GIJOHN_CHK, FLG_GIJOHN_SET, 0, OPT_REQ_PARAM,
+		OPT_FMT_STR_ALLOC, &gijohnserver},
+                
+        {"incxml", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
+		OPT_FMT_STR_ALLOC, &inpFileIncremental},        
+        {"hashes", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
+		OPT_FMT_STR_ALLOC, &inpFileHashes},
+                
+	{"gijsmp", FLG_GIJOHN_SMP_CHK, FLG_GIJOHN_SMP_SET, 0, OPT_REQ_PARAM,
+		"%u", &gijohnsmp},
+
+	{"verbose", FLG_VERBOSE, FLG_VERBOSE},
+
+                
 #ifdef CL_VERSION_1_0
 	{"platform", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
 		OPT_FMT_STR_ALLOC, &options.ocl_platform},
@@ -205,6 +222,11 @@ static struct opt_entry opt_list[] = {
 "--nolog                   disables creation and writing to john.log file\n" \
 "--crack-status            emit a status line whenever a password is cracked\n" \
 "--max-run-time=N          gracefully exit after this many seconds\n" \
+"--gijohn=SERVER:PORT       gijohn's server and port\n" \
+"--gijsmp=NUM               gijohn makes NUM forks\n" \
+"--incxml=FILE              Incremental mode XML specification\n" \
+"--hashes=FILE              Hashes to crack in XML\n" \
+"--verbose                  gijohn's verbose mode\n" \
 "--regen-lost-salts=N      regenerate lost salts (see doc/OPTIONS)\n"
 
 #define JOHN_USAGE_PLUGIN \
@@ -408,7 +430,7 @@ void opt_init(char *name, int argc, char **argv, int show_usage)
 
 	if (!(options.subformat && !strcasecmp(options.subformat, "list")) &&
 	    (!options.listconf))
-	if ((options.flags & (FLG_PASSWD | FLG_PWD_REQ)) == FLG_PWD_REQ) {
+	if ((options.flags & (FLG_PASSWD | FLG_PWD_REQ)) == FLG_PWD_REQ && !(options.flags & FLG_GIJOHN_CHK >0) ) {
 #ifdef HAVE_MPI
 		if (mpi_id == 0)
 #endif

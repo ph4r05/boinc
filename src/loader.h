@@ -268,4 +268,12 @@ extern void ldr_show_pot_file(struct db_main *db, char *name);
  */
 extern void ldr_show_pw_file(struct db_main *db, char *name);
 
+/*
+ * Modified functions for gijohn
+ */
+ 
+extern void ldr_load_xml_array(struct db_main *db, char *xmls, char *xmlformat);
+extern void ldr_load_xml_delarray(struct db_main *db, char *xmls);
+extern void ldr_fix_xmldatabase(struct db_main *db, int clearhashes);
+
 #endif

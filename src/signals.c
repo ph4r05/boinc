@@ -50,6 +50,7 @@
 #include "options.h"
 #include "bench.h"
 
+volatile int aborted_gijohn = 0;
 volatile int event_pending = 0;
 volatile int event_abort = 0, event_save = 0, event_status = 0;
 volatile int event_ticksafety = 0;
@@ -347,7 +348,7 @@ static void sig_remove_timer(void)
 	signal(SIGALRM, SIG_DFL);
 }
 
-static void sig_done(void);
+void sig_done(void);
 
 void sig_init(void)
 {
@@ -374,7 +375,7 @@ void sig_init(void)
 	sig_install_timer();
 }
 
-static void sig_done(void)
+void sig_done(void)
 {
 	sig_remove_update();
 	sig_remove_abort();

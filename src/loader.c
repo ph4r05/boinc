@@ -33,6 +33,7 @@
 #endif
 #include "unicode.h"
 #include "dynamic.h"
+#include "fmt_externs.h"
 
 #ifdef HAVE_CRYPT
 extern struct fmt_main fmt_crypt;
@@ -1052,3 +1053,411 @@ void ldr_show_pw_file(struct db_main *db, char *name)
 {
 	read_file(db, name, RF_ALLOW_DIR, ldr_show_pw_line);
 }
+
+/* gijohn's modified loader functions */
+
+void ldr_fix_xmldatabase(struct db_main *db, int clearhashes)
+{
+	if (clearhashes) ldr_init_salts(db);
+	ldr_remove_marked(db);
+	ldr_filter_salts(db);
+	ldr_init_hash(db);
+	db->loaded = 1;
+}
+
+static int ldr_split_xml_line(char **login, char **ciphertext,
+	char **gecos, char **home,
+	char *source, struct fmt_main **format,
+	struct db_options *db_options, char *line, char *xmlformat)
+{
+	struct fmt_main *alt;
+	char *uid = NULL, *gid = NULL, *shell = NULL;
+	char *split_fields[10];
+	int i, retval; //, valid;
+
+	// Note, only 7 are 'defined' in the passwd format.  We load 10, so that
+	// other formats can add specific extra stuff.
+	for (i = 0; i < 10; ++i) {
+		split_fields[i] = ldr_get_field(&line, db_options->field_sep_char);
+		if (!line && i == 1 && split_fields[1][0] == 0) {
+/* Possible hash on a line on its own (no colons) */
+			char *p = split_fields[0];
+/* Skip leading and trailing whitespace */
+			while (*p == ' ' || *p == '\t') p++;
+			split_fields[1] = p;
+			p += strlen(p) - 1;
+			while (p > split_fields[1] && (*p == ' ' || *p == '\t'))
+				p--;
+			p++;
+/* Some valid dummy hashes may be shorter than 10 characters, so don't subject
+ * them to the length checks. */
+			if (strncmp(split_fields[1], "$dummy$", 7) &&
+			    p - split_fields[1] != 10 /* not tripcode */) {
+/* Check for a special case: possibly a traditional crypt(3) hash with
+ * whitespace in its invalid salt.  Only support such hashes at the very start
+ * of a line (no leading whitespace other than the invalid salt). */
+				if (p - split_fields[1] == 11 &&
+				    split_fields[1] - split_fields[0] == 2)
+					split_fields[1]--;
+				if (p - split_fields[1] == 12 &&
+				    split_fields[1] - split_fields[0] == 1)
+					split_fields[1]--;
+				if (p - split_fields[1] < 13)
+					return 0;
+			}
+			*p = 0;
+			split_fields[0] = no_username;
+		}
+		if (i == 1 && source)
+			strcpy(source, line ? line : "");
+	}
+
+	*login = split_fields[0];
+	*ciphertext = split_fields[1];
+
+/* Check for NIS stuff */
+	if ((!strcmp(*login, "+") || !strncmp(*login, "+@", 2)) &&
+	    strlen(*ciphertext) < 10 && strncmp(*ciphertext, "$dummy$", 7))
+		return 0;
+
+/* SPLFLEN(n) is a macro equiv. of strlen(split_fields[n]) (but faster) */
+	if (SPLFLEN(1) > 0 && SPLFLEN(1) < 7 &&
+	    (SPLFLEN(3) == 32 || SPLFLEN(2) == 32)) {
+		/* pwdump-style input
+		   user:uid:LMhash:NThash:comment:homedir:
+		*/
+		uid = split_fields[1];
+		*gecos = split_fields[4];
+		*home = split_fields[5];
+		gid = shell = "";
+	}
+	else if (SPLFLEN(1) == 0 && SPLFLEN(3) >= 16 && SPLFLEN(4) >= 32 &&
+	         SPLFLEN(5) >= 16) {
+		/* l0phtcrack-style input
+		   user:::lm response:ntlm response:challenge
+		   user::domain:srvr challenge:ntlmv2 response:client challenge
+		 */
+		uid = gid = *home = shell = "";
+		*gecos = split_fields[2]; // in case there's a domain name here
+	}
+	else {
+		/* normal passwd-style input */
+		uid = split_fields[2];
+		gid = split_fields[3];
+		*gecos = split_fields[4];
+		*home = split_fields[5];
+		shell = split_fields[6];
+	}
+
+	if (ldr_check_list(db_options->users, *login, uid)) return 0;
+	if (ldr_check_list(db_options->groups, gid, gid)) return 0;
+	if (ldr_check_shells(db_options->shells, shell)) return 0;
+
+	/*if (*format) {
+		*ciphertext = (*format)->methods.prepare(split_fields, *format);
+		valid = (*format)->methods.valid(*ciphertext, *format);
+		if (!valid) {
+			alt = fmt_list;
+			do {
+				if (alt == *format)
+					continue;
+				if (alt->params.flags & FMT_WARNED)
+					continue;
+#ifdef HAVE_CRYPT
+				if (alt == &fmt_crypt &&
+#ifdef __sun
+				    strncmp(*ciphertext, "$md5$", 5) &&
+				    strncmp(*ciphertext, "$md5,", 5) &&
+#endif
+				    strncmp(*ciphertext, "$5$", 3) &&
+				    strncmp(*ciphertext, "$6$", 3))
+					continue;
+#endif
+				if (alt->methods.valid(*ciphertext,alt)) {
+					alt->params.flags |= FMT_WARNED;
+#ifdef HAVE_MPI
+					if (mpi_id == 0)
+#endif
+					fprintf(stderr,
+					    "Warning: only loading hashes "
+					    "of type \"%s\", but also saw "
+					    "type \"%s\"\n"
+					    "Use the "
+					    "\"--format=%s\" option to force "
+					    "loading hashes of that type "
+					    "instead\n",
+					    (*format)->params.label,
+					    alt->params.label,
+					    alt->params.label);
+					break;
+				}
+			} while ((alt = alt->next));
+		}
+		return valid;
+	}*/
+
+	retval = -1;
+	if ((alt = fmt_list))
+	do {
+		int valid;
+		char *prepared_CT = alt->methods.prepare(split_fields, alt);
+		if (!prepared_CT || !*prepared_CT)
+			continue;
+#ifdef HAVE_CRYPT
+/*
+ * Only probe for support by the current system's crypt(3) if this is forced
+ * from the command-line or/and if the hash encoding string looks like one of
+ * those that are only supported in that way.  Avoid the probe in other cases
+ * because it may be slow and undesirable (false detection is possible).
+ */
+		if (alt == &fmt_crypt &&
+		    fmt_list != &fmt_crypt /* not forced */ &&
+#ifdef __sun
+		    strncmp(prepared_CT, "$md5$", 5) &&
+		    strncmp(prepared_CT, "$md5,", 5) &&
+#endif
+		    strncmp(prepared_CT, "$5$", 3) &&
+		    strncmp(prepared_CT, "$6$", 3))
+			continue;
+#endif
+		if (!(valid = alt->methods.valid(prepared_CT, alt)))
+			continue;
+                if ((retval < 0) && !(strncmp(alt->params.label, xmlformat,
+                (strlen(alt->params.label)>strlen(xmlformat))?strlen(alt->params.label):strlen(xmlformat)))) {
+			fmt_init(*format = alt);
+			retval = valid;
+		}
+#ifdef LDR_WARN_AMBIGUOUS
+#ifdef HAVE_MPI
+		if (mpi_id == 0)
+#endif
+		fprintf(stderr,
+		    "Warning: detected hash type \"%s\", but the string is "
+		    "also recognized as \"%s\"\n"
+		    "Use the \"--format=%s\" option to force loading these "
+		    "as that type instead\n",
+		    (*format)->params.label, alt->params.label,
+		    alt->params.label);
+#endif
+	} while ((alt = alt->next));
+
+	return retval;
+}
+
+static void ldr_load_xml_line(struct db_main *db, char *line, char *xmlformat)
+{
+	static int skip_dupe_checking = 0;
+	struct fmt_main *format;
+	int index, count;
+	char *login, *ciphertext, *gecos=NULL, *home=NULL;
+	char *piece;
+	void *binary, *salt;
+	int salt_hash, pw_hash;
+	struct db_salt *current_salt, *last_salt;
+	struct db_password *current_pw, *last_pw;
+	struct list_main *words;
+	size_t pw_size, salt_size;
+
+	count = ldr_split_xml_line(&login, &ciphertext, &gecos, &home,
+		NULL, &db->format, db->options, line, xmlformat);
+	if (count <= 0) return;
+	if (count >= 2) db->options->flags |= DB_SPLIT;
+
+	format = db->format;
+
+	words = NULL;
+
+	if (db->options->flags & DB_WORDS) {
+		pw_size = sizeof(struct db_password);
+		salt_size = sizeof(struct db_salt);
+	} else {
+		if (db->options->flags & DB_LOGIN)
+			pw_size = sizeof(struct db_password) -
+				sizeof(struct list_main *);
+		else
+			pw_size = sizeof(struct db_password) -
+				(sizeof(char *) + sizeof(struct list_main *));
+		salt_size = sizeof(struct db_salt) -
+			sizeof(struct db_keys *);
+	}
+
+	if (!db->password_hash)
+		ldr_init_password_hash(db);
+
+	for (index = 0; index < count; index++) {
+		piece = format->methods.split(ciphertext, index);
+
+		binary = format->methods.binary(piece);
+		pw_hash = db->password_hash_func(binary);
+
+		if (!(db->options->flags & DB_WORDS) && !skip_dupe_checking) {
+			int collisions = 0;
+			if ((current_pw = db->password_hash[pw_hash]))
+			do {
+				if (!memcmp(current_pw->binary, binary,
+				    format->params.binary_size) &&
+				    !strcmp(current_pw->source, piece)) {
+					db->options->flags |= DB_NODUP;
+					break;
+				}
+				if (++collisions <= LDR_HASH_COLLISIONS_MAX)
+					continue;
+#ifdef HAVE_MPI
+				if (mpi_id == 0) {
+#endif
+				if (format->params.binary_size)
+					fprintf(stderr, "Warning: "
+					    "excessive partial hash "
+					    "collisions detected\n%s",
+					    db->password_hash_func !=
+					    fmt_default_binary_hash ? "" :
+					    "(cause: the \"format\" lacks "
+					    "proper binary_hash() function "
+					    "definitions)\n");
+				else
+					fprintf(stderr, "Warning: "
+					    "check for duplicates partially "
+					    "bypassed to speedup loading\n");
+#ifdef HAVE_MPI
+				}
+#endif
+				skip_dupe_checking = 1;
+				current_pw = NULL; /* no match */
+				break;
+			} while ((current_pw = current_pw->next_hash));
+
+			if (current_pw) continue;
+		}
+
+		salt = format->methods.salt(piece);
+		salt_hash = format->methods.salt_hash(salt);
+
+		if ((current_salt = db->salt_hash[salt_hash]))
+		do {
+			if (!memcmp(current_salt->salt, salt,
+			    format->params.salt_size))
+				break;
+		} while ((current_salt = current_salt->next));
+
+		if (!current_salt) {
+			last_salt = db->salt_hash[salt_hash];
+			current_salt = db->salt_hash[salt_hash] =
+				mem_alloc_tiny(salt_size, MEM_ALIGN_WORD);
+			current_salt->next = last_salt;
+
+			current_salt->salt = mem_alloc_copy(
+				format->params.salt_size, MEM_ALIGN_WORD,
+				salt);
+
+			current_salt->index = fmt_dummy_hash;
+			current_salt->list = NULL;
+			current_salt->hash = &current_salt->list;
+			current_salt->hash_size = -1;
+
+			current_salt->count = 0;
+
+			if (db->options->flags & DB_WORDS)
+				current_salt->keys = NULL;
+
+			db->salt_count++;
+		}
+
+		current_salt->count++;
+		db->password_count++;
+
+		last_pw = current_salt->list;
+		current_pw = current_salt->list = mem_alloc_tiny(
+			pw_size, MEM_ALIGN_WORD);
+		current_pw->next = last_pw;
+
+		last_pw = db->password_hash[pw_hash];
+		db->password_hash[pw_hash] = current_pw;
+		current_pw->next_hash = last_pw;
+
+		current_pw->binary = mem_alloc_copy(
+			format->params.binary_size, MEM_ALIGN_WORD, binary);
+
+		current_pw->source = str_alloc_copy(piece);
+
+		if (db->options->flags & DB_WORDS) {
+			if (!words)
+				words = ldr_init_words(login, gecos, home);
+			current_pw->words = words;
+		}
+
+		if (db->options->flags & DB_LOGIN) {
+			if (count >= 2 && count <= 9) {
+				current_pw->login = mem_alloc_tiny(
+					strlen(login) + 3, MEM_ALIGN_NONE);
+				sprintf(current_pw->login, "%s:%d",
+					login, index + 1);
+			} else
+			if (login == no_username)
+				current_pw->login = login;
+			else
+			if (words && *login)
+				current_pw->login = words->head->data;
+			else
+				current_pw->login = str_alloc_copy(login);
+		}
+	}
+}
+
+void ldr_load_xml_array(struct db_main *db, char *xmls, char *xmlformat)
+{
+        long long int point = 0;
+        char tempchar[255];
+
+        while (strstr(xmls+point, "<hash>") != NULL)
+        {
+                point = strstr(xmls+point, "<hash>")-xmls+6;
+                memset(tempchar, '\0', 255);
+                strncpy(tempchar, xmls+point, strstr(xmls+point, 
+						"</hash>")-xmls-point);
+                ldr_load_xml_line(db, tempchar, xmlformat);
+        }
+}
+
+static void ldr_load_xml_delline(struct db_main *db, char *line)
+{
+        struct fmt_main *format = db->format;
+        struct db_salt *current_salt, *last_salt;
+        struct db_password *current_pw, *last_pw;
+        char *ciphertext;
+        void *binary;
+
+        ciphertext = ldr_get_field(&line, db->options->field_sep_char);
+        if (format->methods.valid(ciphertext, format) != 1) return;
+
+        binary = format->methods.binary(ciphertext);
+        last_salt = NULL;
+        if ((current_salt = db->salts))
+        do {
+                last_pw = NULL;
+                if ((current_pw = current_salt->list))
+                do {
+                        if (current_pw->binary && !memcmp(current_pw->binary, 
+			    binary, format->params.binary_size) &&
+			    !strcmp(current_pw->source, ciphertext)) 
+                                current_pw->binary = NULL;
+                } while ((current_pw = current_pw->next));
+
+        } while ((current_salt = current_salt->next));
+}
+
+void ldr_load_xml_delarray(struct db_main *db, char *xmls)
+{
+        long long int point = 0;
+        char tempchar[255];
+
+        while (strstr(xmls+point, "<hash>") != NULL)
+        {
+                point = strstr(xmls+point, "<hash>")-xmls+6;
+                memset(tempchar, '\0', 255);
+                strncpy(tempchar, xmls+point, strstr(xmls+point, 
+			"</hash>")-xmls-point);
+                ldr_load_xml_delline(db, tempchar);
+        }
+}
+
+

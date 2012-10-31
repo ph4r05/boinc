@@ -83,6 +83,9 @@ extern void cuda_device_list();
 #endif
 #endif
 
+#include "gijohn.h"
+#include "recovery.h"
+
 #if CPU_DETECT
 extern int CPU_detect(void);
 #endif
@@ -202,8 +205,12 @@ extern int pwsafe2john(int argc, char **argv);
 extern int pdf2john(int argc, char **argv);
 extern int zip2john(int argc, char **argv);
 
-static struct db_main database;
+extern struct db_main *crk_db;
+struct db_main database;
 static struct fmt_main dummy_format;
+
+extern int aborted_gijohn;
+extern unsigned int gijohnsmp;
 
 static int exit_status = 0;
 
@@ -380,7 +387,7 @@ static void john_log_format(void)
 			chunk);
 }
 
-static char *john_loaded_counts(void)
+char *john_loaded_counts(void)
 {
 	static char s_loaded_counts[80];
 
@@ -405,8 +412,13 @@ static void john_load(void)
 	umask(077);
 #endif
 
-	if (options.flags & FLG_EXTERNAL_CHK)
+        if ((options.flags & FLG_EXTERNAL_CHK) && FLG_GIJOHN_CHK)
 		ext_init(options.external, NULL);
+
+	if ((options.flags & FLG_GIJOHN_CHK) && FLG_EXTERNAL_CHK)
+	{
+		ext_init("gijohn", NULL);
+	}
 
 	if (options.flags & FLG_MAKECHR_CHK) {
 		options.loader.flags |= DB_CRACKED;
@@ -1194,6 +1206,15 @@ static void john_run(void)
 #endif
 		if (options.flags & FLG_SINGLE_CHK)
 			do_single_crack(&database);
+                if ((options.flags & FLG_GIJOHN_CHK) && FLG_EXTERNAL_CHK)
+		{
+			do
+			{
+				do_external_crack(&database);
+				if (!aborted_gijohn) ext_init("gijohn", NULL);
+			}
+			while (crk_db->password_count && !aborted_gijohn);
+		}
 		else
 		if (options.flags & FLG_WORDLIST_CHK)
 			do_wordlist_crack(&database, options.wordlist,

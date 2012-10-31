@@ -220,4 +220,14 @@ extern struct options_main options;
  */
 extern void opt_init(char *name, int argc, char **argv, int show_usage);
 
+/* gijohn's option */
+#define FLG_GIJOHN_CHK                  0x08000000
+#define FLG_GIJOHN_SET                  (FLG_GIJOHN_CHK | FLG_NONE)
+
+/* gijohn's fork option */
+#define FLG_GIJOHN_SMP_CHK              0x00000010
+#define FLG_GIJOHN_SMP_SET              (FLG_GIJOHN_SMP_CHK | FLG_NONE)
+/* verbose mode for gijohn */
+#define FLG_VERBOSE                     0x00002000
+
 #endif

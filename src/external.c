@@ -7,6 +7,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <signal.h>
 
 #include "misc.h"
 #include "params.h"
@@ -25,13 +27,27 @@
 static unsigned long long mpi_line = 0;
 #endif
 
+#include "gijohn.h"
+
+extern struct parsedxml xmlxml;
+extern void init_external(char *charset_ex, int charsetl_ex, char *fword, char *lword);
+extern void generate_external();
+extern int getthenewpiece();
+extern void sendtheresults();
+extern void destroysession();
+
+extern int first_time;
+int gijohnmodule = 0;
+extern int aborted_gijohn;
+
+
 static char int_word[PLAINTEXT_BUFFER_SIZE];
 static char rec_word[PLAINTEXT_BUFFER_SIZE];
 
 unsigned int ext_flags = 0;
 static char *ext_mode;
 
-static c_int ext_word[PLAINTEXT_BUFFER_SIZE];
+c_int ext_word[PLAINTEXT_BUFFER_SIZE];
 c_int ext_abort, ext_status;
 
 static struct c_ident ext_ident_status = {
@@ -108,36 +124,52 @@ int ext_has_function(char *mode, char *function)
 
 void ext_init(char *mode, struct db_main *db)
 {
+        if (!strncmp(mode, "gijohn", 5)) gijohnmodule = 1;
 	if (db) {
 		maxlen = db->format->params.plaintext_length;
 		return;
 	}
 
-	if (!(ext_source = cfg_get_list(SECTION_EXT, mode))) {
+         if (!gijohnmodule) {
+        if (!(ext_source = cfg_get_list(SECTION_EXT, mode))) {
 #ifdef HAVE_MPI
-		if (mpi_id == 0)
+            if (mpi_id == 0)
 #endif
-		fprintf(stderr, "Unknown external mode: %s\n", mode);
-		error();
-	}
+                fprintf(stderr, "Unknown external mode: %s\n", mode);
+            error();
+        }
 
-	if (c_compile(ext_getchar, ext_rewind, &ext_globals)) {
-		if (!ext_line) ext_line = ext_source->tail;
+        if (c_compile(ext_getchar, ext_rewind, &ext_globals)) {
+            if (!ext_line) ext_line = ext_source->tail;
 
 #ifdef HAVE_MPI
-		if (mpi_id == 0)
+            if (mpi_id == 0)
 #endif
-		fprintf(stderr, "Compiler error in %s at line %d: %s\n",
-			ext_line->cfg_name, ext_line->number,
-			c_errors[c_errno]);
-		error();
-	}
-
+                fprintf(stderr, "Compiler error in %s at line %d: %s\n",
+                    ext_line->cfg_name, ext_line->number,
+                    c_errors[c_errno]);
+            error();
+        }
+        }
 	ext_word[0] = 0;
 	c_execute(c_lookup("init"));
+        if (gijohnmodule)
+	{
+		sig_done();
+		getthenewpiece();
+		init_external(xmlxml.keymap.charset, strlen(xmlxml.keymap.charset), 
+			xmlxml.keymap.firstword, xmlxml.keymap.lastword);
+		sig_init();
+        }
 
 	f_generate = c_lookup("generate");
 	f_filter = c_lookup("filter");
+        
+        if (gijohnmodule)
+	{
+            ext_mode = mode;
+            return;
+        }
 
 	if ((ext_flags & EXT_REQ_GENERATE) && !f_generate) {
 #ifdef HAVE_MPI
@@ -280,7 +312,16 @@ void do_external_crack(struct db_main *db)
 	crk_init(db, fix_state, NULL);
 
 	do {
-		c_execute_fast(f_generate);
+                if (gijohnmodule) {
+                    if (!first_time) {
+                        generate_external();
+                    } else {
+                        first_time = 0;
+                    }
+                } else {
+                    c_execute_fast(f_generate);
+                }
+
 		if (!ext_word[0])
 			break;
 
@@ -321,4 +362,19 @@ void do_external_crack(struct db_main *db)
 
 	crk_done();
 	rec_done(event_abort);
+        
+        if (gijohnmodule)
+	{
+		if (!aborted_gijohn)
+		{
+			sig_done();
+			sendtheresults();
+			sig_init();
+		}
+		else
+		{
+			sig_done();
+			destroysession();
+		}
+	}
 }
