@@ -7,6 +7,11 @@
 char *inpFileIncremental;
 char *inpFileHashes;
 
+char *inpFormat;
+char *inpCharset;
+char *inpFword;
+char *inpLword;
+
 char *gijohnserver;
 int gijohnport;
 unsigned int gijohnsmp;

@@ -150,11 +150,17 @@ static struct opt_entry opt_list[] = {
         {"incxml", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
 		OPT_FMT_STR_ALLOC, &inpFileIncremental},        
         {"hashes", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
-		OPT_FMT_STR_ALLOC, &inpFileHashes},
-                
+		OPT_FMT_STR_ALLOC, &inpFileHashes},    
+        {"xmlformat", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
+		OPT_FMT_STR_ALLOC, &inpFormat},
+        {"xmlcharset", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
+		OPT_FMT_STR_ALLOC, &inpCharset},
+        {"xmlstart", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
+		OPT_FMT_STR_ALLOC, &inpFword},     
+        {"xmlstop", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
+		OPT_FMT_STR_ALLOC, &inpLword},      
 	{"gijsmp", FLG_GIJOHN_SMP_CHK, FLG_GIJOHN_SMP_SET, 0, OPT_REQ_PARAM,
 		"%u", &gijohnsmp},
-
 	{"verbose", FLG_VERBOSE, FLG_VERBOSE},
 
                 
@@ -222,11 +228,15 @@ static struct opt_entry opt_list[] = {
 "--nolog                   disables creation and writing to john.log file\n" \
 "--crack-status            emit a status line whenever a password is cracked\n" \
 "--max-run-time=N          gracefully exit after this many seconds\n" \
-"--gijohn=SERVER:PORT       gijohn's server and port\n" \
-"--gijsmp=NUM               gijohn makes NUM forks\n" \
-"--incxml=FILE              Incremental mode XML specification\n" \
-"--hashes=FILE              Hashes to crack in XML\n" \
-"--verbose                  gijohn's verbose mode\n" \
+"--gijohn=SERVER:PORT      gijohn's server and port\n" \
+"--gijsmp=NUM              gijohn makes NUM forks\n" \
+"--incxml=FILE             Incremental mode XML specification\n" \
+"--hashes=FILE             Hashes to crack in XML\n" \
+"--xmlformat=FORMAT        Manual format specification for gi\n" \
+"--xmlstart=START          First word\n" \
+"--xmlstop=STOP            Last word\n" \
+"--xmlcharset=CHARSET      Charset\n" \
+"--verbose                 gijohn's verbose mode\n" \
 "--regen-lost-salts=N      regenerate lost salts (see doc/OPTIONS)\n"
 
 #define JOHN_USAGE_PLUGIN \

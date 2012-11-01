@@ -40,6 +40,7 @@
 #include "gijohn.h"
 #include "loader.h"
 #include "compiler.h"
+#include "path.h"
 #ifdef HAVE_MPI
 #include "john-mpi.h"
 #endif
@@ -92,7 +93,7 @@ int crackedhashnum;
 int actlen = 0;
 struct hostent *host_entry;
 
-int useDirectFile=0;
+int localConfiguration=0;
 int useSeparateHashes=0;
 
 /* yeah, it's pretty difficult :) */
@@ -507,29 +508,6 @@ void getini(char *user, char *password)
 	return;
 }
 
-/* parse the response */
-/**
- * Parse response XML - very simple XML parsing, no special XML libraries used.
- * Extracts directly hard coded parameters. Fills configuration structure struct parsedxml.
- * 
- * Recognized XML tags:
- * # format 
- * # start      first word of key space
- * # stop       last word of key space
- * # charset    charset to use to generate keys
- * # clearhashes
- * # upgrade
- * # error
- * # sessionid
- * # newhashes
- * # delhashes
- * 
- * #@param xml
- */
-void parsexml(char *xml){
-    parsexml2(xml, 0);
-}
-
 void parsexml2(char *xml, int ignoreNewHash)
 {
 	char temp[128];
@@ -604,6 +582,29 @@ void parsexml2(char *xml, int ignoreNewHash)
 	}
 }
 
+/* parse the response */
+/**
+ * Parse response XML - very simple XML parsing, no special XML libraries used.
+ * Extracts directly hard coded parameters. Fills configuration structure struct parsedxml.
+ * 
+ * Recognized XML tags:
+ * # format 
+ * # start      first word of key space
+ * # stop       last word of key space
+ * # charset    charset to use to generate keys
+ * # clearhashes
+ * # upgrade
+ * # error
+ * # sessionid
+ * # newhashes
+ * # delhashes
+ * 
+ * #@param xml
+ */
+void parsexml(char *xml){
+    parsexml2(xml, 0);
+}
+
 /* sometimes hostname resolve doesnt work... */
 struct hostent *getthehostname(char *host)
 {
@@ -639,20 +640,6 @@ int getconnection(struct hostent *host_entry, int port)
 	}
 
 	return sd;
-}
-
-/**
- * Download (HTTP GET) some XML from server
- * 
- * @param sd
- * @param xml
- * @param what
- * @param where
- * @param port
- * @param verbose
- */
-void getxml(int sd, char **xml, char *what, char *where, int port, int verbose){
-    getxml2(sd, xml, what, where, port, verbose, 0);
 }
 
 /**
@@ -720,6 +707,20 @@ void getxml2(int sd, char **xml, char *what, char *where, int port, int verbose,
 	fclose(stream);
 
 	return;
+}
+
+/**
+ * Download (HTTP GET) some XML from server
+ * 
+ * @param sd
+ * @param xml
+ * @param what
+ * @param where
+ * @param port
+ * @param verbose
+ */
+void getxml(int sd, char **xml, char *what, char *where, int port, int verbose){
+    getxml2(sd, xml, what, where, port, verbose, 0);
 }
 
 /**
@@ -1076,7 +1077,7 @@ void sendtheresults()
 	int sd;
 
 	makeitvalidxml(&post);
-        if (!useDirectFile){
+        if (!localConfiguration){
             if ((post2 = malloc(sizeof(char)*strlen(post)*3+1)) == NULL)
             {
                     fprintf(stderr, "Malloc error...%s %d\n", __FILE__, __LINE__);
@@ -1089,7 +1090,7 @@ void sendtheresults()
 
 	do
 	{
-            if (!useDirectFile){
+            if (!localConfiguration){
 		*xmlxml.error = 0;
 		sd = getconnection(host_entry, gijohnport);
 		postxml(sd, &xml, "/sendhashes.php", gijohnserver, gijohnport, post/*, 0*/);
@@ -1211,16 +1212,27 @@ int getthenewpiece()
 
         // check strlen of input files
         if (inpFileIncremental!=NULL){
-            useDirectFile=1;
-            printf("Incremental is not null! S: %s\n", inpFileIncremental);
+            localConfiguration=1;
+            printf("[+] Using local XML configuration: [%s]\n", inpFileIncremental);
+        }
+        
+        // some settings can be specified on command line, but then must be separate
+        // hash file present!
+        if (inpCharset!=NULL
+                && inpFormat!=NULL
+                && inpFword!=NULL
+                && inpLword!=NULL
+                && inpFileHashes!=NULL){
+            localConfiguration=1;
+            printf("[+] Using command line configuration. fword: [%s] lword: [%s] charset: [%s]\n", inpFword, inpLword, inpCharset);
         }
         
         if (inpFileHashes!=NULL){
             useSeparateHashes=1;
-            printf("Hashes is not null! S: %s\n", inpFileHashes);
+            printf("[+] Using separate hashes: [%s]\n", inpFileHashes);
         }
         
-	if (!useDirectFile && getnewsid)
+	if (!localConfiguration && getnewsid)
 	{		
 		getini(username, password);		
 		makeformatandperformancexml(&post, username, password);
@@ -1289,7 +1301,7 @@ int getthenewpiece()
 		exit(1);
 	}
         
-        if (!useDirectFile){
+        if (!localConfiguration){
             sprintf(query, "/getpieces.php?sessionid=%s&user=%s", xmlxml.sessionid, username);
             do
             {
@@ -1318,13 +1330,32 @@ int getthenewpiece()
             }
             while (*xmlxml.error);
         } else {
-            getxmlfile(&xml, inpFileIncremental, 1);
-            printf("[+] XML loaded %s\n", xml);
-            parsexml2(xml, useSeparateHashes);
-            printf("[+] Parsed\n");
-            free(xml);
-            printf("[+] Freed\n");
+            if (inpFileIncremental){
+                // if we have XML file specified, use that
+                getxmlfile(&xml, inpFileIncremental, 1);
+                printf("[+] XML loaded %s\n", xml);
+                parsexml2(xml, useSeparateHashes);
+                printf("[+] Parsed\n");
+                free(xml);
+            } else {
+                // here it seems we have everything in command line
+		memset(xmlxml.format, '\0', 64);
+		strcpy(xmlxml.format, inpFormat);
+	
+		memset(xmlxml.keymap.firstword, '\0', 64);
+		strcpy(xmlxml.keymap.firstword, inpFword);
+	
+		memset(xmlxml.keymap.lastword, '\0', 64);
+		strcpy(xmlxml.keymap.lastword, inpLword);
+	
+		memset(xmlxml.keymap.charset, '\0', 256);
+		strcpy(xmlxml.keymap.charset, inpCharset);
+
+		xmlxml.newhashes[0] = 0;
+		xmlxml.delhashes[0] = 0;
+            }
             
+            // if we have separate hashes specified, use that, may be local file or URL
             if (useSeparateHashes){
                 printf("[+] Using separate hashes: %s\n", inpFileHashes);
                 getxmlfile(&xml, inpFileHashes, 1);
@@ -1332,7 +1363,6 @@ int getthenewpiece()
                 parsexml(xml);
                 printf("[+] Parsed\n");
                 free(xml);
-                printf("[+] Freed\n");
             }
         }
         
@@ -1367,7 +1397,7 @@ int getthenewpiece()
         
 	if (firstrun)
 	{
-            if (!useDirectFile)
+            if (!localConfiguration)
 		printf("[+] Server: %s\n[+] Charset: %s\n[+] Charset length: %d\n", gijohnserver, xmlxml.keymap.charset, (int)strlen(xmlxml.keymap.charset));
             else
                 printf("[+] Charset: %s\n[+] Charset length: %d\n", xmlxml.keymap.charset, (int)strlen(xmlxml.keymap.charset));
