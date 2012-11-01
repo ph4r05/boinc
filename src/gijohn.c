@@ -1150,7 +1150,7 @@ void sendtheresults()
 */              
                 printf("Using direct file. Stdouting... %s", post);
                 
-                if ((fd = open(path_expand(GIJOHN_HASHES),
+                if ((fd = open(path_expand(outXml!=NULL ? outXml : GIJOHN_HASHES),
                         O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR)) < 0)
                         pexit("open: %s", path_expand(GIJOHN_HASHES));
                 

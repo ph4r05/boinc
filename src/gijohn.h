@@ -6,6 +6,7 @@
 
 char *inpFileIncremental;
 char *inpFileHashes;
+char *outXml;
 
 char *inpFormat;
 char *inpCharset;

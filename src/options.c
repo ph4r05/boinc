@@ -149,6 +149,8 @@ static struct opt_entry opt_list[] = {
                 
         {"incxml", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
 		OPT_FMT_STR_ALLOC, &inpFileIncremental},        
+        {"outxml", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
+		OPT_FMT_STR_ALLOC, &outXml},  
         {"hashes", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
 		OPT_FMT_STR_ALLOC, &inpFileHashes},    
         {"xmlformat", FLG_NONE, FLG_NONE, 0, OPT_REQ_PARAM,
@@ -231,6 +233,7 @@ static struct opt_entry opt_list[] = {
 "--gijohn=SERVER:PORT      gijohn's server and port\n" \
 "--gijsmp=NUM              gijohn makes NUM forks\n" \
 "--incxml=FILE             Incremental mode XML specification\n" \
+"--outxml=FILE             Result XML file\n" \
 "--hashes=FILE             Hashes to crack in XML\n" \
 "--xmlformat=FORMAT        Manual format specification for gi\n" \
 "--xmlstart=START          First word\n" \
