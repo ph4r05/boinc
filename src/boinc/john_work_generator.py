@@ -15,19 +15,17 @@ class BruteGen:
         # basic key space characteristics
         self.length  = 4
         self.charset = "abcdefghijklmnopqrstuvwxyz0123456789"
-        self.charsetl = len(self.charset)
         
         # how many fragments to split?
         self.fragments = 10
         
         # compute size of key space
-        self.lastIndex = pow(self.charsetl, 8)-1L
-        self.increment = self.lastIndex/self.fragments
+        self._initCharset()
         
     def _initCharset(self):
         """Update charset settings"""
         self.charsetl = len(self.charset)
-        self.lastIndex = pow(self.charsetl, 8)-1L
+        self.lastIndex = pow(self.charsetl, self.length)-1L
         self.increment = self.lastIndex/self.fragments
         
     def setCharset(self, newCharset):
@@ -131,7 +129,7 @@ class WorkGenerator:
 IN=`boinc resolve_filename specxml.xml`
 OUT=`boinc resolve_filename johnresult_hash.xml`
 echo "Going to execute john, in: $IN out: $OUT"
-./john --verbose --gijohn=127.0.0.1:80 --incxml=$IN
+./john --verbose --gijohn=127.0.0.1:80 --incxml=$IN --outxml=$OUT
 echo "John executed"       
 cp johnresult_hash.xml $OUT
 echo "Ending..."
