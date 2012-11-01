@@ -1,0 +1,9 @@
+<job_desc>
+	<task>
+		<stderr_filename>stderr.txt</stderr_filename>
+		<stdout_filename>stdout.txt</stdout_filename>	
+		<application>john</application>
+        <multi_process/>
+        <append_cmdline_args/>        
+	</task>
+</job_desc>
