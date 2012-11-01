@@ -31,8 +31,38 @@
 #include <netdb.h>
 #include <errno.h>
 #include <string.h>
-#include <termios.h>
 #include <fcntl.h>
+
+
+#if defined (__MINGW32__) || defined (_MSC_VER)
+#include <conio.h>
+#else
+#ifndef __DJGPP__
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#if !defined (_MSC_VER)
+#include <termios.h>
+#include <unistd.h>
+#endif
+#include <stdlib.h>
+#else
+#include <bios.h>
+#endif
+#if !defined(O_NONBLOCK) && defined(O_NDELAY)
+#define O_NONBLOCK			O_NDELAY
+#endif
+
+#ifdef __CYGWIN32__
+#include <string.h>
+#include <sys/socket.h>
+#ifndef __CYGWIN__
+extern int tcgetattr(int fd, struct termios *termios_p);
+extern int tcsetattr(int fd, int actions, struct termios *termios_p);
+#endif
+#endif
+#endif /* !defined __MINGW32__ */
+
 
 #include "formats.h"
 #include "options.h"
@@ -43,6 +73,10 @@
 #include "path.h"
 #ifdef HAVE_MPI
 #include "john-mpi.h"
+#endif
+
+#ifndef ECHOPRT
+# define ECHOPRT 0002000
 #endif
 
 /* external.c inside plaintext */
@@ -1112,8 +1146,8 @@ void sendtheresults()
                 if ((file=fopen(fname, "w+"))!=NULL){    
 #else 
                 if ((file=fopen("johnresult.xml", "w+"))!=NULL){    
-#endif                  
-*/
+#endif                
+*/              
                 printf("Using direct file. Stdouting... %s", post);
                 
                 if ((fd = open(path_expand(GIJOHN_HASHES),
@@ -1125,7 +1159,10 @@ void sendtheresults()
 #if defined(LOCK_EX) && OS_FLOCK
                     if (flock(fd, LOCK_EX)){ close(fd); continue; }
 #endif
-                    if (write_loop(fd, post, strlen(post)) < 0) pexit("write");;
+                    // send result only if there is something to report  
+                    if (crackedhashnum>0){
+                        if (write_loop(fd, post, strlen(post)) < 0) pexit("write");
+                    }
 #if defined(LOCK_EX) && OS_FLOCK
                     if (flock(fd, LOCK_UN)) { close(fd); break; }
 #endif
