@@ -4,6 +4,8 @@ import boinc_path_config
 import sys, os, os.path, shutil
 import hashlib, base64
 import logging
+import random
+import hashlib
 
 logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logging.DEBUG)
 
@@ -72,7 +74,18 @@ class BruteGen:
             #print "fragment ", i, " fword: ", fword, " lword: ", lword, ' space: ', self.increment
         
         return wu
-
+    
+    def getRandom(self, num=1):
+        """Generates num of random words from this key space"""
+        res = []
+        for i in range(0,num):
+            strr=''
+            for j in range(0, self.length):
+                strr += self.charset[random.randint(0, self.charsetl-1)]
+            res.append(strr)
+        
+        return res
+    
 class WorkGenerator:
 
     def __init__(self):
@@ -113,46 +126,77 @@ class WorkGenerator:
             hashXml='<newhashes>\n\t<hash>' + '</hash>\n\t<hash>'.join(hashes) + '</hash>\n</newhashes>'
         return xmlPattern % (formatHash, fword, lword, charset, hashXml)
         
+    def getGenWrapperWu(self):
+        pattern="""
+IN=`boinc resolve_filename specxml.xml`
+OUT=`boinc resolve_filename johnresult_hash.xml`
+echo "Going to execute john, in: $IN out: $OUT"
+./john --verbose --gijohn=127.0.0.1:80 --incxml=$IN
+echo "John executed"       
+cp johnresult_hash.xml $OUT
+echo "Ending..."
+"""
+        return pattern
+        
     def get_download_path(self, fname):
         cmd = "./bin/dir_hier_path " + fname
         res_fname = os.popen(cmd, "r").read().strip()
         return res_fname
         
-    def get_config_fname(self, counter):
-        fname = os.path.join("specxml_%s_%04d" % (self.wu_name, counter))
+    def get_fname(self, fname):
         res_fname = self.get_download_path(fname)
         return res_fname
         
-    def save_config_file(self, counter, xml):        
-        fname = self.get_config_fname(counter)
+    def save_file(self, fname, data):
         fpath = os.path.dirname(fname)
         if not os.path.exists(fpath):
             os.makedirs(fpath)
         
-        newXml = open(fname,'w')
-        newXml.write(xml)
-        newXml.flush()
-        newXml.close()
+        f = open(fname,'w')
+        f.write(data)
+        f.flush()
+        f.close()
         return fname
         
+    def save_config_file(self, counter, xml):       
+        fname = os.path.join("specxml_%s_%04d" % (self.wu_name, counter)) 
+        fname = self.get_fname(fname)
+        return self.save_file(fname, xml)
+    
+    def save_wuscript(self, counter, data):
+        fname = os.path.join("wu_%s_%04d.sh" % (self.wu_name, counter)) 
+        fname = self.get_fname(fname)
+        return self.save_file(fname, data)
+    
+    def getRandomHashes(self, num=100):
+        """Returns list of random hashes"""
+        l = self.bgen.getRandom(num)
+        return [hashlib.md5(x).hexdigest() for x in l]
+        
     def generate_v3(self):
-        self.bgen.setLength(4)
-        self.bgen.setFragments(50)
+        self.bgen.setLength(6)
+        self.bgen.setFragments(15)
         frags = self.bgen.makeFragments()
-        hashes = ['65ba841e01d6db7733e90a5b7f9e6f80', 'f73070b50a314dbeb183fc4b4127ecac', '62edfe4c60e8942fd27804e05391d84e']
-           
+        
+        # generate random hashes
+        hashes = self.getRandomHashes(1000)
+        
         for (id,frag) in enumerate(frags):
             wu_name = "%s[%04d]" % (self.wu_name, id)
             
             # stage config file
             xml = self.getSpecXML(frag[0], frag[1], self.bgen.charset, 'raw-md5', hashes)
             self.save_config_file(id, xml)
+            
+            # wu config
+            wudata = self.getGenWrapperWu()
+            self.save_wuscript(id, wudata)
                 
             # Call create_work
             cmd =  "./bin/create_work -appname JohnTheRipper -wu_name %s" % wu_name
             cmd += " -wu_template templates/JohnTheRipper/default_in.xml" 
             cmd += " -result_template templates/JohnTheRipper/default_out.xml" 
-            cmd +=  " " + "specxml_%s_%04d" % (self.wu_name, id)
+            cmd +=  " " + "wu_%s_%04d.sh " % (self.wu_name, id) + "specxml_%s_%04d" % (self.wu_name, id)
             
             os.system(cmd)
             logging.debug("Command line: %s",  cmd)

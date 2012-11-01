@@ -1,0 +1,17 @@
+<version>    
+        <file>
+        <physical_name>gw_launcher.exe</physical_name>
+        <logical_name>gw_launcher.exe</logical_name>
+                <main_program/>
+            </file>
+        <file>
+        <physical_name>gitbox.exe</physical_name>
+        <logical_name>gitbox.exe</logical_name>
+            </file>
+        <file>
+        <physical_name>gw_launcher.zip</physical_name>
+        <logical_name>gw_launcher.zip</logical_name>
+            </file>
+
+     
+</version>
