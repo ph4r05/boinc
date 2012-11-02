@@ -131,7 +131,6 @@ OUT=`boinc resolve_filename johnresult_hash.xml`
 echo "Going to execute john, in: $IN out: $OUT"
 ./john --verbose --gijohn=127.0.0.1:80 --incxml=$IN --outxml=$OUT
 echo "John executed"       
-cp johnresult_hash.xml $OUT
 echo "Ending..."
 """
         return pattern
