@@ -1,0 +1,16 @@
+<version>    
+        <file>
+        <physical_name>gw_launcher_0.22</physical_name>
+        <logical_name>gw_launcher</logical_name>
+                <main_program/>
+            </file>
+        <file>
+        <physical_name>gw_launcher_0.22.zip</physical_name>
+        <logical_name>gw_launcher_0.22.zip</logical_name>
+            </file>
+	<file>
+        <physical_name>gw_launcher_0.22x.zip</physical_name>
+        <logical_name>gw_launcher.zip</logical_name>
+            </file>
+     
+</version>
