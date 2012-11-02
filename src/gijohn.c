@@ -183,6 +183,8 @@ void init_external(char *charset_ex, int charsetl_ex, char *fword, char *lword)
         if (minlength!=maxlength){
             for(i=0; i<length; i++) tword[i] = charset[charsetl-1];
             tword[i]=0x00;
+        } else {
+            strcpy(tword, lword);
         }
         
         // compute modulo
@@ -268,7 +270,7 @@ int spaceExhaustedRecomputeModulo(){
     
     if (length==maxlength){
         // last given interval - use proposed last word
-        strcpy((char*)&tword, lastWord);
+        strcpy(tword, lastWord);
     } else {
         // still not last - generate last word from this size
         for(i=0; i<length; i++) tword[i] = charset[charsetl-1];
@@ -1370,7 +1372,7 @@ int getthenewpiece()
             if (inpFileIncremental){
                 // if we have XML file specified, use that
                 getxmlfile(&xml, inpFileIncremental, 1);
-                printf("[+] XML loaded %s\n", xml);
+                printf("[+] XML loaded\n");
                 parsexml2(xml, useSeparateHashes);
                 printf("[+] Parsed\n");
                 free(xml);
