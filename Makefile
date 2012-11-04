@@ -111,8 +111,12 @@ TARGET := $(shell ./config.guess)
 
 SVN_REV=$(shell if [ `which svnversion`x != x ]; then svnversion; else echo local-build; fi)
 # CFLAGS and LDFLAGS are for the users to override from the command line.
-CFLAGS += -g -Wall 
-LDFLAGS += 
+# DEBUG:
+# CFLAGS += -g -O0 -Wall 
+# LDFLAGS += -g 
+
+CFLAGS += -O2 -Wall 
+LDFLAGS +=  
 ALL_CFLAGS = $(CFLAGS) -DSVNREV=\"Revision:$(SVN_REV)\"
 ALL_LDFLAGS = $(LDFLAGS)
 EXTRA_PROGRAMS =
@@ -131,11 +135,11 @@ RM = rm -f
 
 #setting DCAPI to "yes" will set BOINC to "yes" also
 BOINC=yes
-DCAPI=yes
+DCAPI=no
 
 ifndef BOINCDIR
 ifeq ($(findstring mingw,$(TARGET)),mingw)
-       BOINCDIR=../../boinc-mingw/
+       BOINCDIR=../boinc_src/boinc
 else
        BOINCDIR=/usr/include/BOINC
 endif
@@ -143,7 +147,7 @@ endif
 
 ifeq ($(findstring mingw,$(TARGET)),mingw)
 BOINC_CFLAGS=-I$(BOINCDIR)/api -I$(BOINCDIR)/lib -I./tools/boinc-mingw32/include/
-BOINC_LIBS=-L./tools/boinc-mingw32/ -lboinc -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic -lm
+BOINC_LIBS=-L../boinc_src/boinc/lib -lboinc -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic -lm
 else
 BOINC_CFLAGS=-I$(BOINCDIR)
 BOINC_LIBS=-lboinc_api -lboinc -lcrypto -lstdc++ -lpthread -lm
@@ -160,7 +164,8 @@ LAUNCHER_LDFLAGS+=-Lbox/ -lbox
 EXTRA_PROGRAMS+=gw_launcher$X
 ifeq ($(findstring mingw,$(TARGET)),mingw)
 OPENSSLDIR=$(OPENSSL_DIR)
-ALL_LDFLAGS+=$(BOINC_LIBS) -lwinmm -lth32
+ALL_LDFLAGS+=$(BOINC_LIBS) -lwinmm 
+#-lth32
 ALL_CFLAGS+=$(BOINC_CFLAGS) -DBOINC 
 LAUNCHER_CFLAGS+=-DWIN32 -D_WIN32 -D_MT -DNDEBUG -D_WINDOWS -DCLIENT -DNODB -D_CONSOLE -fexceptions
 else
@@ -686,8 +691,8 @@ $(BOX_FILE): $(BOX_OBJS)
 gitbox$X: $(GIT_OBJS) $(BOX_FILE)
 	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $^ $(ALL_LDFLAGS) $(LIBS)
 
-gw_launcher$X: $(LAUNCHER_OBJS) $(COMPAT_OBJS) $(BOX_FILE)
-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(LAUNCHER_CFLAGS) -o $@ $^ $(COMPAT_CFLAGS)  $(LAUNCHER_LDFLAGS) $(ALL_LDFLAGS) $(LIBS) 
+gw_launcher$X: $(LAUNCHER_OBJS) $(COMPAT_OBJS) $(BOX_FILE) $(BOINCDIR)/lib/libboinc.a $(BOINCDIR)/lib/libboinc_api.a
+	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(LAUNCHER_CFLAGS) -o $@ $^ $(COMPAT_CFLAGS)  $(LAUNCHER_LDFLAGS) $(ALL_LDFLAGS) $(LIBS) -lpsapi 
 
 gw_launcher$X-clean:
 	$(RM) $(LAUNCHER_OBJS) gw_launcher$X

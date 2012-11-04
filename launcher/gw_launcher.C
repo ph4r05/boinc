@@ -75,6 +75,9 @@ static const char* dc_files[] = {
 
 const char* WU_SCRIPT = "wu_script.sh";
 
+// applet name for unzip
+const char* applet_name = "gw_launcher";
+
 // from unzip.c in libbb
 extern "C" {
   int unzip_main(int argc, char **argv);
@@ -156,21 +159,32 @@ int main(int argc, char* argv[]) {
   filename.append(".zip");
   std::string zip_filename_resolved = gw_resolve_filename(filename.c_str());
   std::string genwrapper_exe_resolved = gw_resolve_filename(GENWRAPPER_EXE);
+  bool usableZipFile=false;
+  const char * zip2use = zip_filename_resolved.c_str();
+  const char * zip2show = filename.c_str();
+  
+  if (access(zip2use, R_OK) != -1){
+      usableZipFile=true;
+  } else if (access(filename.c_str(), R_OK) != -1){
+      usableZipFile=true;
+      zip2use = filename.c_str();
+  }
 
-  if (access(zip_filename_resolved.c_str(), R_OK) != -1) {
+  if (usableZipFile) {
     const char *zip_argv[] = {
-      "unzip", "-o", "-X", zip_filename_resolved.c_str(), 0
+      "unzip", "-o", "-X", zip2use, 0
     };
     const int zip_argc = sizeof(zip_argv) / sizeof(zip_argv[0]) - 1;
 
-    gw_do_log(LOG_INFO, "Unzipping '%s'", filename.c_str());
+    printf("applet: %s\n", applet_name);
+    gw_do_log(LOG_INFO, "Unzipping '%s'", zip2show);
     if (unzip_main(zip_argc, (char **)zip_argv)) {
-      gw_do_log(LOG_ERR, "Failed to unzip '%s'", zip_filename_resolved.c_str());
+      gw_do_log(LOG_ERR, "Failed to unzip '%s'", zip2use);
       gw_finish(EXIT_FAILURE);
     }
   } else {
-	gw_do_log(LOG_INFO, "Zipfile not found '%s'",
- 		zip_filename_resolved.c_str());
+	gw_do_log(LOG_INFO, "Zipfile not found ('%s', '%s')",
+ 		zip_filename_resolved.c_str(), filename.c_str());
   }
 
   // Check for the interpreter

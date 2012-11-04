@@ -41,21 +41,23 @@ enum {
 
 #define ZIP_HEADER_LEN 26
 
+#pragma pack(1)
 typedef union {
 	uint8_t raw[ZIP_HEADER_LEN];
 	struct {
-		uint16_t version;                       /* 0-1 */
-		uint16_t flags;                         /* 2-3 */
-		uint16_t method;                        /* 4-5 */
-		uint16_t modtime;                       /* 6-7 */
-		uint16_t moddate;                       /* 8-9 */
+		uint16_t version ;                       /* 0-1 */
+		uint16_t flags ;                         /* 2-3 */
+		uint16_t method ;                        /* 4-5 */
+		uint16_t modtime ;                       /* 6-7 */
+		uint16_t moddate ;                       /* 8-9 */
 		uint32_t crc32 ATTRIBUTE_PACKED;        /* 10-13 */
 		uint32_t cmpsize ATTRIBUTE_PACKED;      /* 14-17 */
 		uint32_t ucmpsize ATTRIBUTE_PACKED;     /* 18-21 */
-		uint16_t filename_len;                  /* 22-23 */
-		uint16_t extra_len;                     /* 24-25 */
+		uint16_t filename_len ;                  /* 22-23 */
+		uint16_t extra_len ;                     /* 24-25 */
 	} formatted ATTRIBUTE_PACKED;
 } zip_header_t; /* ATTRIBUTE_PACKED - gcc 4.2.1 doesn't like it (spews warning) */
+#pragma pack()
 
 #define ZIP_CD_HEADER_LEN 42
 
@@ -105,6 +107,7 @@ typedef union {
  * allows for poor packing, whereby the overall struct may be too long,
  * even though the elements are all in the right place.
  */
+
 struct BUG_zip_header_must_be_26_bytes {
 	char BUG_zip_header_must_be_26_bytes[
 		offsetof(zip_header_t, formatted.extra_len) + 2 ==
