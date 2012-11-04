@@ -9,13 +9,9 @@
  */
 #include <stdio.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -28,7 +24,6 @@
 #endif
 
 #include <stdlib.h>
-#include <netdb.h>
 #include <errno.h>
 #include <string.h>
 #include <fcntl.h>
@@ -36,7 +31,18 @@
 
 #if defined (__MINGW32__) || defined (_MSC_VER)
 #include <conio.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
+#define sleep(time) Sleep(1000*(time))
+#define bcopy(src, dst, n) memcpy(src, dst, n)
+#define bzero(src, n)      memset(src, 0x00, n)
 #else
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <sys/wait.h>
+#include <netdb.h>
 #ifndef __DJGPP__
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -424,6 +430,9 @@ void splitserver(char *server, int *port)
  */
 void getini(char *user, char *password)
 {
+#if defined (__MINGW32__) || defined (_MSC_VER)
+        return;
+#else
 	FILE *hd;
 	char buf[256];
 	char *content;
@@ -542,6 +551,7 @@ void getini(char *user, char *password)
 	if (*password == 0) strncpy(password, strstr(content, "password=")+strlen("password="), length);
 
 	return;
+#endif
 }
 
 void parsexml2(char *xml, int ignoreNewHash)
@@ -648,7 +658,7 @@ struct hostent *getthehostname(char *host)
 
 	if ((host_entry = gethostbyname(host)) == NULL)
 	{
-		herror("[-] hostname lookup error...");
+                fprintf(stderr, "[-] hostname lookup error...");
 		exit(1);
 	}
 	return host_entry;
@@ -664,7 +674,7 @@ int getconnection(struct hostent *host_entry, int port)
 	{
 		return -1;
 	}
-
+        
 	bzero(&host_addr, sizeof(host_addr));
 	bcopy(host_entry->h_addr_list[0], &host_addr.sin_addr.s_addr, host_entry->h_length);
 	host_addr.sin_family = host_entry->h_addrtype;
@@ -1223,7 +1233,7 @@ void destroysession()
  */
 int getthenewpiece()
 {
-	int sd, i;
+	int sd;
 	char *xml, query[256], *post, *post2;
 
 	if (firstrun)
@@ -1287,7 +1297,11 @@ int getthenewpiece()
 		setbuf(stdout, NULL);
 		if (options.flags & FLG_VERBOSE) printf("[+] Getting new session\n");
 
+#if defined (__MINGW32__) || defined (_MSC_VER)
+                ;
+#else
 		if (gijohnsmp > 1) {
+                        int i;
 			for (i = 1; i < gijohnsmp; i++) {
 				if (!fork()) {
 					sessionname = malloc(sizeof(char)*30);
@@ -1298,6 +1312,7 @@ int getthenewpiece()
 				}
 			}
 		}
+#endif
 
 		sprintf(query, "/newsession.php");
 

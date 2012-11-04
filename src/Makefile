@@ -5,7 +5,19 @@
 # ...with changes in the jumbo patch, by various authors
 #
 
-CC = gcc
+HOST=
+TARGET= 
+HOST_CC = gcc
+ifeq ($(HOST),$(TARGET))
+        CC = $(HOST_CC)
+        AR = ar
+        STRIP = strip
+else
+        CC = $(TARGET)-gcc
+        AR = $(TARGET)-ar
+        STRIP = $(TARGET)-strip
+endif
+
 AS = $(CC)
 LD = $(CC)
 CPP = $(CC)
@@ -20,8 +32,8 @@ CPPFLAGS = -E
 ## Uncomment the TWO lines below for MPI (can be used together with OMP as well)
 ## For experimental MPI_Barrier support, add -DJOHN_MPI_BARRIER too.
 ## For experimental MPI_Abort support, add -DJOHN_MPI_ABORT too.
-CC = mpicc -DHAVE_MPI
-MPIOBJ = john-mpi.o
+#CC = mpicc -DHAVE_MPI
+#MPIOBJ = john-mpi.o
 
 OMPFLAGS =
 # gcc with OpenMP
@@ -1643,7 +1655,7 @@ john.com: john.asm
 
 ../run/john.exe: $(JOHN_OBJS)
 	$(LD) $(JOHN_OBJS) $(LDFLAGS) -lkernel32 -o ../run/john.exe
-	strip ../run/john.exe
+	$(STRIP) ../run/john.exe
 
 # this LD line removed from the ../run/john-mingw.exe rule (MinGW32 builds)
 # this change needed for full openssl linking, in 1.7.7-jumbo-6
@@ -1651,67 +1663,67 @@ john.com: john.asm
 #	$(LD) $(JOHN_OBJS) $(LDFLAGS) -lkernel32 -o ../run/john-mingw.exe
 
 ../run/john-mingw.exe: $(JOHN_OBJS)
-	$(LD) $(JOHN_OBJS) $(LDFLAGS) -lkernel32 -o ../run/john-mingw.exe
-	strip ../run/john-mingw.exe
+	$(LD) $(JOHN_OBJS) $(LDFLAGS) -lkernel32 -lws2_32 -o ../run/john-mingw.exe
+	$(STRIP) ../run/john-mingw.exe
 	cp ../run/john-mingw.exe ../run/john.exe
 
 ../run/unshadow.exe: symlink.c
 	$(CC) symlink.c -o ../run/unshadow.exe
-	strip ../run/unshadow.exe
+	$(STRIP) ../run/unshadow.exe
 
 ../run/unafs.exe: symlink.c
 	$(CC) symlink.c -o ../run/unafs.exe
-	strip ../run/unafs.exe
+	$(STRIP) ../run/unafs.exe
 
 ../run/undrop.exe: symlink.c
 	$(CC) symlink.c -o ../run/undrop.exe
-	strip ../run/undrop.exe
+	$(STRIP) ../run/undrop.exe
 
 ../run/ssh2john.exe: symlink.c
 	$(CC) symlink.c -o ../run/ssh2john.exe
-	strip ../run/ssh2john.exe
+	$(STRIP) ../run/ssh2john.exe
 
 ../run/keepass2john.exe: symlink.c
 	$(CC) symlink.c -o ../run/keepass2john.exe
-	strip ../run/keepass2john.exe
+	$(STRIP) ../run/keepass2john.exe
 
 ../run/keychain2john.exe: symlink.c
 	$(CC) symlink.c -o ../run/keychain2john.exe
-	strip ../run/keychain2john.exe
+	$(STRIP) ../run/keychain2john.exe
 
 ../run/pdf2john.exe: symlink.c
 	$(CC) symlink.c -o ../run/pdf2john.exe
-	strip ../run/pdf2john.exe
+	$(STRIP) ../run/pdf2john.exe
 
 ../run/rar2john.exe: symlink.c
 	$(CC) symlink.c -o ../run/rar2john.exe
-	strip ../run/rar2john.exe
+	$(STRIP) ../run/rar2john.exe
 
 ../run/mozilla2john.exe: symlink.c
 ifdef HAVE_NSS
 	$(CC) symlink.c -o ../run/mozilla2john.exe
-	strip ../run/mozilla2john.exe
+	$(STRIP) ../run/mozilla2john.exe
 endif
 
 ../run/racf2john.exe: symlink.c
 	$(CC) symlink.c -o ../run/racf2john.exe
-	strip ../run/racf2john.exe
+	$(STRIP) ../run/racf2john.exe
 
 ../run/pwsafe2john.exe: symlink.c
 	$(CC) symlink.c -o ../run/pwsafe2john.exe
-	strip ../run/pwsafe2john.exe
+	$(STRIP) ../run/pwsafe2john.exe
 
 ../run/zip2john.exe: symlink.c
 	$(CC) symlink.c -o ../run/zip2john.exe
-	strip ../run/zip2john.exe
+	$(STRIP) ../run/zip2john.exe
 
 ../run/hccap2john.exe: symlink.c
 	$(CC) symlink.c -o ../run/hccap2john.exe
-	strip ../run/hccap2john.exe
+	$(STRIP) ../run/hccap2john.exe
 
 ../run/unique.exe: symlink.c
 	$(CC) symlink.c -o ../run/unique.exe
-	strip ../run/unique.exe
+	$(STRIP) ../run/unique.exe
 
 ../run/genmkvpwd: $(GENMKVPWD_OBJS)
 	$(LD) $(GENMKVPWD_OBJS) $(LDFLAGS) -o ../run/genmkvpwd
