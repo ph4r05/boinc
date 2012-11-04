@@ -1,0 +1,45 @@
+
+
+ Marosi Attila Csaba <atisu@sztaki.hu>
+ 2008.03.03
+
+
+
+ 1.) What is This ?
+
+ 
+ A test application for the generic wrapper for BOINC.
+ 
+ This script resolves the files "in" and "out". Reads a number (NUM) from in. For this 
+ many times the script sleeps 1 second, reports the finished percentage (100 / NUM * %iter%)
+ the Core Client and writes it to "out".
+ 
+ To run it in standalon mode, copy the modified gitbox into this directory and rename it
+ to box, run "doit.sh"
+ 
+ The main script is test.sh.
+ 
+
+ 
+ 2.) Currently available BOINC functions
+
+ 
+ boinc init  -  this is only for "cosmetical" reasons. In reality boinc_init() is invoked 
+                when the shell executes.
+		
+ boinc resolve_filename %FILENAME%  - resolves the given filename and prints it to stdout.
+ 
+ boinc fraction_done - report the fraction done (0.00 <= x <= 1.00) the Core Client.
+ 
+ boinc fraction_done_perecent - the same, but 0 <= x <= 100
+ 
+ boinc finish %status% - invoke boinc_finish(status)
+ 
+
+ 
+ 3.) Notes
+
+ 
+ - tested only on Linux and in standalone mode...
+ 
+ 

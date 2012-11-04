@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="84">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df name="genwrapper" root=".">
+      <df name="apps">
+        <df name="test">
+          <in>cpu_time.c</in>
+        </df>
+      </df>
+      <df name="box">
+        <df name="applets">
+          <in>applet_tables.c</in>
+        </df>
+        <df name="archival">
+          <df name="libunarchive">
+            <in>check_header_gzip.c</in>
+            <in>data_align.c</in>
+            <in>data_extract_all.c</in>
+            <in>data_extract_to_stdout.c</in>
+            <in>data_skip.c</in>
+            <in>decompress_bunzip2.c</in>
+            <in>decompress_unlzma.c</in>
+            <in>decompress_unzip.c</in>
+            <in>filter_accept_all.c</in>
+            <in>filter_accept_reject_list.c</in>
+            <in>find_list_entry.c</in>
+            <in>get_header_tar.c</in>
+            <in>header_list.c</in>
+            <in>header_skip.c</in>
+            <in>header_verbose_list.c</in>
+            <in>init_handle.c</in>
+            <in>seek_by_jump.c</in>
+            <in>seek_by_read.c</in>
+          </df>
+          <in>bbunzip.c</in>
+          <in>gzip.c</in>
+          <in>tar.c</in>
+          <in>unzip.c</in>
+        </df>
+        <df name="boinc">
+          <in>boinc.c</in>
+        </df>
+        <df name="coreutils">
+          <df name="libcoreutils">
+            <in>coreutils.h</in>
+            <in>cp_mv_stat.c</in>
+          </df>
+          <in>basename.c</in>
+          <in>cat.c</in>
+          <in>chmod.c</in>
+          <in>cp.c</in>
+          <in>cut.c</in>
+          <in>date.c</in>
+          <in>dirname.c</in>
+          <in>dos2unix.c</in>
+          <in>echo.c</in>
+          <in>env.c</in>
+          <in>expr.c</in>
+          <in>false.c</in>
+          <in>head.c</in>
+          <in>ls.c</in>
+          <in>md5_sha1_sum.c</in>
+          <in>mkdir.c</in>
+          <in>mv.c</in>
+          <in>od.c</in>
+          <in>printenv.c</in>
+          <in>printf.c</in>
+          <in>pwd.c</in>
+          <in>realpath.c</in>
+          <in>rm.c</in>
+          <in>rmdir.c</in>
+          <in>seq.c</in>
+          <in>sleep.c</in>
+          <in>sort.c</in>
+          <in>stat.c</in>
+          <in>sum.c</in>
+          <in>tac.c</in>
+          <in>tail.c</in>
+          <in>test.c</in>
+          <in>touch.c</in>
+          <in>tr.c</in>
+          <in>true.c</in>
+          <in>uname.c</in>
+          <in>uniq.c</in>
+          <in>wc.c</in>
+          <in>yes.c</in>
+        </df>
+        <df name="debianutils">
+          <in>which.c</in>
+        </df>
+        <df name="editors">
+          <in>awk.c</in>
+          <in>cmp.c</in>
+          <in>diff.c</in>
+          <in>patch.c</in>
+          <in>sed.c</in>
+        </df>
+        <df name="findutils">
+          <in>find.c</in>
+          <in>grep.c</in>
+        </df>
+        <df name="include">
+          <in>applet_tables.h</in>
+          <in>applets.h</in>
+          <in>autoconf.h</in>
+          <in>busybox.h</in>
+          <in>byteswap.h</in>
+          <in>dump.h</in>
+          <in>libbb.h</in>
+          <in>platform.h</in>
+          <in>shadow_.h</in>
+          <in>unarchive.h</in>
+          <in>usage.h</in>
+          <in>xatonum.h</in>
+          <in>xregex.h</in>
+        </df>
+        <df name="libbb">
+          <in>appletlib.c</in>
+          <in>ask_confirmation.c</in>
+          <in>bb_basename.c</in>
+          <in>bb_do_delay.c</in>
+          <in>bb_qsort.c</in>
+          <in>bb_strtonum.c</in>
+          <in>chomp.c</in>
+          <in>compare_string_array.c</in>
+          <in>concat_path_file.c</in>
+          <in>concat_subpath_file.c</in>
+          <in>copy_file.c</in>
+          <in>copyfd.c</in>
+          <in>crc32.c</in>
+          <in>default_error_retval.c</in>
+          <in>dump.c</in>
+          <in>error_msg.c</in>
+          <in>error_msg_and_die.c</in>
+          <in>execable.c</in>
+          <in>fclose_nonstdin.c</in>
+          <in>fflush_stdout_and_exit.c</in>
+          <in>fgets_str.c</in>
+          <in>full_write.c</in>
+          <in>get_last_path_component.c</in>
+          <in>get_line_from_file.c</in>
+          <in>getopt32.c</in>
+          <in>herror_msg.c</in>
+          <in>herror_msg_and_die.c</in>
+          <in>human_readable.c</in>
+          <in>info_msg.c</in>
+          <in>inode_hash.c</in>
+          <in>isdirectory.c</in>
+          <in>last_char_is.c</in>
+          <in>llist.c</in>
+          <in>make_directory.c</in>
+          <in>md5.c</in>
+          <in>messages.c</in>
+          <in>mode_string.c</in>
+          <in>parse_mode.c</in>
+          <in>perror_msg.c</in>
+          <in>perror_msg_and_die.c</in>
+          <in>perror_nomsg.c</in>
+          <in>perror_nomsg_and_die.c</in>
+          <in>process_escape_sequence.c</in>
+          <in>ptr_to_globals.c</in>
+          <in>read.c</in>
+          <in>recursive_action.c</in>
+          <in>remove_file.c</in>
+          <in>safe_strncpy.c</in>
+          <in>safe_write.c</in>
+          <in>simplify_path.c</in>
+          <in>skip_whitespace.c</in>
+          <in>trim.c</in>
+          <in>u_signal_names.c</in>
+          <in>verror_msg.c</in>
+          <in>warn_ignoring_args.c</in>
+          <in>wfopen.c</in>
+          <in>wfopen_input.c</in>
+          <in>xatonum.c</in>
+          <in>xatonum_template.c</in>
+          <in>xfuncs.c</in>
+          <in>xgetcwd.c</in>
+          <in>xreadlink.c</in>
+          <in>xregcomp.c</in>
+        </df>
+        <df name="shell">
+          <in>ash.c</in>
+          <in>ash_fork.c</in>
+          <in>ash_fork.h</in>
+          <in>ash_ptr_hack.c</in>
+        </df>
+      </df>
+      <df name="compat">
+        <in>ansidecl.h</in>
+        <in>fnmatch.c</in>
+        <in>fnmatch.h</in>
+        <in>mingw.c</in>
+        <in>mmap.c</in>
+        <in>pread.c</in>
+        <in>regex.c</in>
+        <in>regex.h</in>
+        <in>setenv.c</in>
+        <in>strcasestr.c</in>
+        <in>strtoumax.c</in>
+        <in>unsetenv.c</in>
+        <in>vasprintf.c</in>
+      </df>
+      <df name="doc">
+      </df>
+      <df name="launcher">
+        <in>gw_common.C</in>
+        <in>gw_common.h</in>
+        <in>gw_launcher.C</in>
+        <in>task.C</in>
+        <in>task.h</in>
+      </df>
+      <df name="tools">
+        <df name="boinc-mingw32">
+        </df>
+      </df>
+      <in>common.h</in>
+      <in>cpu_time.c</in>
+      <in>ctype.c</in>
+      <in>exec_cmd.c</in>
+      <in>exec_cmd.h</in>
+      <in>git-compat-util.h</in>
+      <in>quote.c</in>
+      <in>quote.h</in>
+      <in>run-command.c</in>
+      <in>run-command.h</in>
+      <in>spawn-pipe.c</in>
+      <in>spawn-pipe.h</in>
+      <in>standalone-box.c</in>
+      <in>usage.c</in>
+    </df>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>default</compilerSet>
+      </toolsSet>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile TARGET=i686-pc-mingw32</buildCommand>
+          <cleanCommand>echo "done"</cleanCommand>
+          <executablePath></executablePath>
+        </makeTool>
+      </makefileType>
+      <item path="box/applets/applet_tables.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/archival/bbunzip.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/archival/gzip.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/check_header_gzip.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/data_align.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/data_extract_all.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/data_extract_to_stdout.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/data_skip.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/decompress_bunzip2.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/decompress_unlzma.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/decompress_unzip.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/filter_accept_all.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/filter_accept_reject_list.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/find_list_entry.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/get_header_tar.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/header_list.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/header_skip.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/header_verbose_list.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/init_handle.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/seek_by_jump.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/libunarchive/seek_by_read.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/archival/tar.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/archival/unzip.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/basename.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/cat.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/chmod.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/cp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/cut.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/date.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/dirname.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/dos2unix.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/echo.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/env.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/expr.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/false.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/head.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/libcoreutils/cp_mv_stat.c"
+            ex="false"
+            tool="0"
+            flavor2="3">
+      </item>
+      <item path="box/coreutils/ls.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/md5_sha1_sum.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/mkdir.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/mv.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/od.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/printenv.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/printf.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/pwd.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/realpath.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/rm.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/rmdir.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/seq.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/sleep.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/sort.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/sum.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/tac.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/tail.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/test.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/touch.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/tr.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/true.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/uniq.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/wc.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/coreutils/yes.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/debianutils/which.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/editors/awk.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/editors/cmp.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/editors/diff.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="box/editors/patch.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/editors/sed.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/findutils/find.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/findutils/grep.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/appletlib.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/ask_confirmation.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/bb_basename.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/bb_do_delay.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/bb_qsort.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/bb_strtonum.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/chomp.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/compare_string_array.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/concat_path_file.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/concat_subpath_file.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/copy_file.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/copyfd.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/crc32.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/default_error_retval.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/dump.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/error_msg.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/error_msg_and_die.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/execable.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/fclose_nonstdin.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/fflush_stdout_and_exit.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/fgets_str.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/full_write.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/get_last_path_component.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+      </item>
+      <item path="box/libbb/get_line_from_file.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/getopt32.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/herror_msg.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/herror_msg_and_die.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/human_readable.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/info_msg.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/inode_hash.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/isdirectory.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/last_char_is.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/llist.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/make_directory.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/md5.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/messages.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/mode_string.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/parse_mode.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/perror_msg.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/perror_msg_and_die.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/perror_nomsg.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/perror_nomsg_and_die.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/process_escape_sequence.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+      </item>
+      <item path="box/libbb/ptr_to_globals.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/read.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/recursive_action.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/remove_file.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/safe_strncpy.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/safe_write.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/simplify_path.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/skip_whitespace.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/trim.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/u_signal_names.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/verror_msg.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/warn_ignoring_args.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/wfopen.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/wfopen_input.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/xatonum.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/xfuncs.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/xgetcwd.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/xreadlink.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/libbb/xregcomp.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/shell/ash.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="box/shell/ash_ptr_hack.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="compat/fnmatch.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="compat/mingw.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="compat/mmap.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="compat/pread.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="compat/regex.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="compat/setenv.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="compat/strcasestr.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="compat/strtoumax.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="compat/unsetenv.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="compat/vasprintf.c" ex="false" tool="0" flavor2="2">
+      </item>
+      <item path="ctype.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="exec_cmd.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="quote.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="run-command.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="spawn-pipe.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="standalone-box.c" ex="false" tool="0" flavor2="3">
+      </item>
+      <item path="usage.c" ex="false" tool="0" flavor2="3">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
