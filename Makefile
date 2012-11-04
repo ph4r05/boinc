@@ -141,7 +141,7 @@ ifndef BOINCDIR
 ifeq ($(findstring mingw,$(TARGET)),mingw)
        BOINCDIR=../boinc_src/boinc
 else
-       BOINCDIR=/usr/include/BOINC
+       BOINCDIR=/usr/include/boinc
 endif
 endif
 
@@ -691,8 +691,14 @@ $(BOX_FILE): $(BOX_OBJS)
 gitbox$X: $(GIT_OBJS) $(BOX_FILE)
 	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) -o $@ $^ $(ALL_LDFLAGS) $(LIBS)
 
+ifeq ($(findstring mingw,$(TARGET)),mingw)
 gw_launcher$X: $(LAUNCHER_OBJS) $(COMPAT_OBJS) $(BOX_FILE) $(BOINCDIR)/lib/libboinc.a $(BOINCDIR)/lib/libboinc_api.a
 	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(LAUNCHER_CFLAGS) -o $@ $^ $(COMPAT_CFLAGS)  $(LAUNCHER_LDFLAGS) $(ALL_LDFLAGS) $(LIBS) -lpsapi 
+else
+gw_launcher$X: $(LAUNCHER_OBJS) $(COMPAT_OBJS) $(BOX_FILE)
+	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(LAUNCHER_CFLAGS) -o $@ $^ $(COMPAT_CFLAGS)  $(LAUNCHER_LDFLAGS) $(ALL_LDFLAGS) $(LIBS)
+endif
+
 
 gw_launcher$X-clean:
 	$(RM) $(LAUNCHER_OBJS) gw_launcher$X
