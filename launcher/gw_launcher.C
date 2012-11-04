@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
 
   // Look for & unzip the .zip archive, if any
   std::string filename(basename(argv[0]));
-
+  gw_do_log(LOG_INFO, "Files info: Argv[0]: '%s'; filename: '%s'; ", argv[0], filename.c_str());
 #ifdef _WIN32
   if (filename.compare(filename.length() - 4, 4, ".exe") == 0)
     filename = filename.erase(filename.length() - 4, filename.length()-1);
@@ -159,9 +159,21 @@ int main(int argc, char* argv[]) {
   filename.append(".zip");
   std::string zip_filename_resolved = gw_resolve_filename(filename.c_str());
   std::string genwrapper_exe_resolved = gw_resolve_filename(GENWRAPPER_EXE);
+  gw_do_log(LOG_INFO, "ZipName resolved: '%s'; fname: '%s' ExeResolved: %s", zip_filename_resolved.c_str(), filename.c_str(), genwrapper_exe_resolved.c_str());
   bool usableZipFile=false;
   const char * zip2use = zip_filename_resolved.c_str();
   const char * zip2show = filename.c_str();
+  
+  // getcwd
+  {
+        char *path=NULL;
+        size_t size=0;
+        path=getcwd(path,size);
+        if (path!=NULL){
+                gw_do_log(LOG_INFO, "CWD: '%s'; ", path);
+                free(path);
+        }
+  }
   
   if (access(zip2use, R_OK) != -1){
       usableZipFile=true;
