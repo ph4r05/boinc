@@ -78,6 +78,10 @@ const char* WU_SCRIPT = "wu_script.sh";
 // applet name for unzip
 const char* applet_name = "gw_launcher";
 
+// default zip filename
+const char* zipArchive1 = "gw_launcher.zip";
+const char* zipArchive2 = "bundle.zip";
+
 // from unzip.c in libbb
 extern "C" {
   int unzip_main(int argc, char **argv);
@@ -175,12 +179,20 @@ int main(int argc, char* argv[]) {
         }
   }
   
+  // try different zip archives
   if (access(zip2use, R_OK) != -1){
       usableZipFile=true;
   } else if (access(filename.c_str(), R_OK) != -1){
       usableZipFile=true;
       zip2use = filename.c_str();
+  } else if (access(zipArchive1, R_OK) != -1){
+      usableZipFile=true;
+      zip2use = zipArchive1;
+  } else if (access(zipArchive2, R_OK) != -1){
+      usableZipFile=true;
+      zip2use = zipArchive2;
   }
+  gw_do_log(LOG_INFO, "ZipName found: '%s'", zip2use);
 
   if (usableZipFile) {
     const char *zip_argv[] = {
