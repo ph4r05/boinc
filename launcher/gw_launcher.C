@@ -179,18 +179,21 @@ int main(int argc, char* argv[]) {
         }
   }
   
+  std::string zip_filename1 = gw_resolve_filename(zipArchive1);
+  std::string zip_filename2 = gw_resolve_filename(zipArchive2);
+  
   // try different zip archives
   if (access(zip2use, R_OK) != -1){
       usableZipFile=true;
   } else if (access(filename.c_str(), R_OK) != -1){
       usableZipFile=true;
       zip2use = filename.c_str();
-  } else if (access(zipArchive1, R_OK) != -1){
+  } else if (access(zip_filename1.c_str(), R_OK) != -1){
       usableZipFile=true;
-      zip2use = zipArchive1;
-  } else if (access(zipArchive2, R_OK) != -1){
+      zip2use = zip_filename1.c_str();
+  } else if (access(zip_filename2.c_str(), R_OK) != -1){
       usableZipFile=true;
-      zip2use = zipArchive2;
+      zip2use = zip_filename2.c_str();
   }
   gw_do_log(LOG_INFO, "ZipName found: '%s'", zip2use);
 
