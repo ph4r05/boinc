@@ -1,0 +1,273 @@
+\documentclass[a4paper,12pt,titlepage,dvipdfm]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage{t1enc}
+\usepackage{times}
+\usepackage[margin=2cm]{geometry}
+\usepackage[pdftex]{graphicx}
+\usepackage{listings}
+\usepackage{xspace}
+\usepackage{url}
+
+
+\title{GenWrapper - BOINC Generic Wrapper for legacy applications}
+\begin{document}
+
+
+\begin{center}
+    \vspace*{20mm}
+	\LARGE{\textbf{GenWrapper - DC-API/ BOINC Generic Wrapper for legacy applications}}
+	\vfill
+\end{center}
+\begin{center}
+    \vspace{30mm}
+    \Large{MTA SZTAKI LPDS}\\
+    \vspace{10mm}
+    \large{BUDAPEST, 2008}\\
+    \vspace{100mm}
+    \small{r1828 - 20080829}
+\end{center}
+\thispagestyle{empty}
+
+\pagebreak
+\tableofcontents
+
+\pagebreak
+          
+
+\section{Introduction}
+
+GenWrapper is a generic wrapper interpreter (scriptable as the POSIX shell). It is very much based on GitBox that was extracted from git and modified to run
+standalone. Gitbox is a stripped down version of BusyBox modified to compile under Windows with MinGW. This version should also compile on Linux and Mac OS X (and probably more but those are not tested) besides Windows. Main features are:
+
+\begin{itemize}
+    \item Runs legacy applications without BOINCification.
+    \item Makes BOINC API/ DC-API available in POSIX shell scripting.
+    \item Available for Mac OS X, MS Windows, GNU/ Linux (it is based on GitBox).
+    \item Small size (\(\approx\)400k).
+\end{itemize}
+
+\section{Usage}
+
+\subsection{Applications and work units}
+
+\paragraph*{} GenWrapper consists of two parts a launcher (\texttt{gw\_launcher\{.exe\}}) and GitBox (\texttt{gitbox\{.exe\}}). The launcher acts as a DC-API/ BOINC application, it's task is to prepare the application and communicate with BOINC, while GitBox provides a generic DC-API/ BOINC enabled scripting interface. Any application using GenWrapper must have the following components:
+
+\begin{itemize}
+    \item The launcher, renamed to the name of the registered application in BOINC (e.g.: numsys-1.00\_i686-apple-darwin)
+    \item Either:
+        \begin{itemize}
+            \item A zip file with the same name and \texttt{.zip} extension holding the legacy application and GitBox binaries. GitBox on Windows must be named as \texttt{gitbox.exe} on Linux/ Mac OS X as \texttt{gitbox})
+            \item Or the application binaries and GitBox executable unzipped. GitBox on Windows must be named as \texttt{gitbox.exe} on Linux/ Mac OS X as \texttt{gitbox}.
+        \end{itemize}
+    \item An application bound script named \texttt{profile.sh} (\emph{profile script}). This script will be executed each time before the application is started. \emph{This is optional.}
+\end{itemize}
+
+\paragraph*{}The optional profile script should follow these rules:
+
+\begin{itemize}
+    \item Should be a standard POSIX shell script (no bash or ksh extensions). It can be tested locally via GitBox (execute \texttt{gitbox sh profile.sh}).
+    \item It is run after uncompressing the application archive, but before starting the work unit.
+    \item Should handle all platform/ architecture dependent task required for the application to run (e.g.: set library path).
+    \item Exported environment variables are later available for the \emph{work unit supplied script}.   
+\end{itemize}
+
+\paragraph*{}Work units for any GenWrapper application must follow these rules:
+
+\begin{itemize}
+    \item They should supply a shell script (\emph{work unit supplied script}), which:
+        \begin{itemize}
+            \item is a standard POSIX shell script (no bash or ksh extensions). It can be tested locally via GitBox (execute \texttt{gitbox sh \emph{scriptname}}).
+            \item should contain platform/ architecture independent code only.
+            \item should execute the legacy application(s).
+            \item has access to environment variables set in the profile script.
+        \end{itemize}
+    \item The first command line argument of the work unit should be the name of the work unit supplied shell script.
+\end{itemize}
+
+\subsection{Available shell commands}
+
+Available BOINC/ DC-API commands:
+\begin{itemize}
+    \item \texttt{boinc resolve\_filename} <FILENAME>
+    \item \texttt{boinc fraction\_done} <0.00 .. 1.00>
+    \item \texttt{boinc fraction\_done\_percent} <0 .. 100>
+\end{itemize}
+
+\paragraph*{} The \texttt{exit} <STATUS> command equals to calling the \texttt{boinc\_finish(<STATUS>)} BOINC C API function
+
+\paragraph*{} Notes:
+\begin{itemize}
+    \item The shell scripts are BOINC compound applications. 
+    \item DC-API enabled version also uses these BOINC shell commands.
+    \item Legacy applications executed by the shell \textbf{cannot contain any BOINC API / DC-API functions} (especially init and finish functions).
+     
+\end{itemize}
+
+\paragraph*{} Available non-BOINC specific shell commands:
+\begin{itemize}
+    \item \texttt{ash}, \texttt{awk}, \texttt{basename}, \texttt{bunzip2}, \texttt{bzcat}, \texttt{cat}, \texttt{chmod}, \texttt{cmp}, \texttt{cp},
+     \texttt{cut}, \texttt{date}, \texttt{diff}, \texttt{dirname}, \texttt{dos2unix}, \texttt{echo}, \texttt{egrep}, \texttt{env}, \texttt{exit}, 
+     \texttt{expr}, \texttt{false}, \texttt{fgrep}, \texttt{find}, \texttt{grep}, \texttt{gunzip}, \texttt{gzip}, \texttt{head}, \texttt{ls},
+     \texttt{lzmacat}, \texttt{md5sum}, \texttt{mkdir}, \texttt{mv}, \texttt{od}, \texttt{patch}, \texttt{printenv}, \texttt{printf}, \texttt{pwd},
+     \texttt{realpath}, \texttt{rm}, \texttt{rmdir}, \texttt{sed}, \texttt{seq}, \texttt{sh}, \texttt{sleep}, \texttt{sort}, \texttt{sum},
+     \texttt{tac}, \texttt{tail}, \texttt{tar}, \texttt{test}, \texttt{touch}, \texttt{tr}, \texttt{true}, \texttt{uniq}, \texttt{unix2dos},
+     \texttt{unlzma}, \texttt{unzip}, \texttt{wc}, \texttt{which}, \texttt{yes}, \texttt{zcat}, \texttt{[}, \texttt{[[}
+\end{itemize}
+
+\subsection{Example shell script}
+
+Figure \ref{fig:wuscript} shows a simple example for a work unit supplied script. It reads an integer from a logical file named \texttt{in} and runs a loop that many times. 
+
+\lstset{
+  breaklines=true,                                     % line wrapping on
+  language=make,
+  frame=trbl,
+  framesep=5pt,
+  basicstyle=\small,
+  keywordstyle=\ttfamily,
+  identifierstyle=\texttt,
+  stringstyle=\ttfamily,
+  linewidth=\textwidth,
+  numbers=none
+}
+
+\begin{figure}[htb]
+\begin{lstlisting}[breaklines=true]
+IN=`boinc resolve_filename in`
+OUT=`boinc resolve_filename out`
+NUM=`cat "${IN}"`
+PERCENT_PER_ITER=$((10000 / ${NUM}))
+
+for i in `seq ${NUM}`; do
+	PERCENT_COMPLETE=$((${PERCENT_PER_ITER} * ${i} / 100))
+	boinc fraction_done_percent ${PERCENT_COMPLETE}
+	echo -e "I am ${PERCENT_COMPLETE}% complete." >> "${OUT}";
+	sleep 1;
+done
+\end{lstlisting}
+\caption{Example work unit supplied script}\label{fig:wuscript}
+\end{figure}
+
+In each iteration it sleeps for a second and writes the completion status to the logical file named \texttt{out} while reporting it to the BOINC client. Notes:
+\begin{itemize}
+    \item \textbf{Every filename needs to be resolved via}\texttt{ boinc resolve\_filename}\textbf{.}
+    \item Variable references should be properly quoted (e.g: \texttt{NUM=`cat "\$\{IN\}"`}).
+    \item Only the launcher is DC-API/ BOINC enabled, GitBox and shell scripts act as BOINC compound applications.
+    \item \texttt{exit} <STATUS> command equals to calling the \texttt{boinc\_finish(<STATUS>)} BOINC C API function.
+    \item Applications executed by the script cannot contain any BOINC/ DC-API functions.
+\end{itemize}
+
+\subsection{Flow}
+
+A GenWrapper wrapped application works as follows:
+\begin{enumerate}
+    \item A BOINC client downloads an application and a work unit.
+    \item The main executable of the application is the launcher for GenWrapper. This launcher is executed by the client.
+    \item The launcher is a DC-API/ BOINC enabled application, thus it contacts the client after start.
+    \item The launcher checks if a zip file named \texttt{<application\_name>.zip } exists, if yes it unzips it.
+    \item The launcher generates a shell script which:
+        \begin{itemize}
+            \item checks if a file named \texttt{profile.sh} exists, if yes it sources it.
+            \item executes GitBox with the command line arguments of the work unit, where the first argument must be the name of the \emph{work unit supplied shell script}. The launcher will resolve the name of this script, it is enough to provide the logical file name.
+        \end{itemize}
+    
+    \item The generated shell script is executed.
+    \item When the script finishes the exit status of the \emph{work unit supplied script} is set as the exit status of the work unit.
+    \item The launcher exits and the results are uploaded to the server.
+\end{enumerate}
+
+\subsection{Batch mode}
+
+Using GenWrapper:
+\begin{itemize}
+    \item more legacy executables may be bundled together and run, for example one executable could use the output of another executable in a single work unit, even if there are special preparations to be done with the output before using it as input.
+%    \item with server side support any number of work units may be bundled into a single work.
+\end{itemize}
+
+\section{Compiling}
+
+GenWrapper can be compiled as standalone, BOINC enabled or DC-API enabled. It's been tested and working on Debian GNU/Linux, MS Windows XP and Mac OS X 10.5. For compiling on Windows use the MINGW toolkit, MS Visual Studio is not supported. It uses a single \emph{Makefile}, the compile options must be set there. 
+
+\lstset{
+  breaklines=true,                                     % line wrapping on
+  language=make,
+  frame=trbl,
+  framesep=5pt,
+  basicstyle=\small,
+  keywordstyle=\ttfamily,
+  identifierstyle=\texttt,
+  stringstyle=\ttfamily,
+  linewidth=\textwidth,
+  numbers=none
+}
+
+\begin{figure}[htb]
+\begin{lstlisting}[breaklines=true]
+#setting DCAPI to "yes" will set BOINC to "yes" also
+BOINC=yes
+DCAPI=yes
+
+ifeq ($(findstring mingw,$(TARGET)),mingw)
+DCAPI_HOME=C:/Projects/dcapi/trunk
+BOINC_CFLAGS=-IC:/Projects/boinc_mingw/include -IC:/Projects/openssl/include
+BOINC_LIBS=-LC:/Projects/boinc_mingw/ -lboinc -LC:/Projects/openssl/lib -lcrypto -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic -lm
+#LAUNCHER_CFLAGS=
+#LAUNCHER_LDFLAGS=
+#only when comiling with mingw and BOINC is set to "yes"
+#OPENSSL_DIR=C:/Projects/openssl/lib/
+else
+DCAPI_CFLAGS=`pkg-config --cflags dcapi-boinc-client`
+DCAPI_LIBS=`pkg-config --libs dcapi-boinc-client`
+BOINC_CFLAGS=-I/usr/include/BOINC
+BOINC_LIBS=-lboinc_api -lboinc -lcrypto -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic -lpthread -lm
+endif
+
+\end{lstlisting}
+\caption{Configurable options in the Makefile}\label{fig:makefile}
+\end{figure}
+
+\paragraph*{}The \texttt{BOINC=yes|no} and \texttt{DCAPI=yes|no} options (on Figure \ref{fig:makefile}) decide whether DC-API/ BOINC support should by compiled in. On Linux/ Mac OS X no other adjustment is needed. 
+
+On Windows the \texttt{DCAPI\_HOME}, \texttt{BOINC\_CFLAGS} and \texttt{BOINC\_LIBS} variables should be set to the directories where the BOINC/ DC-API libraries and includes reside. Linking libraries compiled with MinGW and MS Visual C++ can be troublesome, we recommend to compile the BOINC and DC-API libs via MinGW too.
+
+\subsection{Cross-compiling}
+
+
+For cross-compiling you should set the TARGET variable. (Additionally setting CC, AR and STRIP or other variables may also be necessary if defaults are not sufficient). 
+
+\subsubsection{On Unix/Linux (also includes Mac OS X) to Windows}
+
+To set up cross-compiling environment:                                                                                                                                                                                                   
+\begin{enumerate}
+%  
+    \item Get the 'Cross-Hosted MinGW Build Tool' script from the MinGW download page (\url{http://sourceforge.net/project/showfiles.php?group_id=2435}). Tested with x86-mingw32-build.sh-0.0-20061107-1
+    \item Set the package versions in \texttt{x86-mingw32-build.sh.conf}, tested with: \\
+        \\
+        \begin{tabular}{|c|c|}
+            \hline
+            GCC\_VERSION                   & 3.4.5-20060117-1\\
+            \hline
+            BINUTILS\_VERSION              & 2.18.50-20080109-2\\
+            \hline
+            RUNTIME\_VERSION               & 3.14\\
+            \hline
+            W32API\_VERSION                & 3.11\\
+            \hline
+        \end{tabular}
+    \item Run the script to get and build cross-compiling environment
+    \item To compile simply do: \\ \\ \texttt{make TARGET=/path/to/mingw/install/dir/bin/i386-mingw32}
+\end{enumerate}
+                                                                                                                                                                                                                                           
+\subsubsection{On Cygwin to Windows}
+                                                                                                                                                                                                                                           
+To compile with the Cygwin compiler install the mingw versions from setup.exe                                                                                                                                                              
+and then you can issue the following command:                                                                                                                                                                                              
+\\
+\\                                                                                                                                                                                                                                           
+\texttt{make TARGET=mingw CC="gcc -mno-cygwin" AR=ar STRIP=strip}
+
+\section{Contact and feedback}
+
+Please provide feedback to \texttt{desktopgrid@lpds.sztaki.hu}.
+
+\end{document}

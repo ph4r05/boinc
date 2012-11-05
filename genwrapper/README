@@ -1,0 +1,43 @@
+* What is it?
+
+This is a generic wrapper interpreter (scriptable as the POSIX shell). It is
+very much based on GitBox that was extracted from git and modified to run
+standalone. Gitbox is a stripped down version of BusyBox modified to compile
+under Windows with MinGW. This version should also compile on Linux and
+Mac OS X (and probably more but those are not tested) besides Windows.
+
+* Building
+
+Normally a simple 'make' is enough to build it for the same platform you are
+currently running, but it can also be cross-compiled for another platform
+(see below for instructions).
+
+* Cross-compiling
+
+For cross-compiling you should set the TARGET variable. (Additionally setting
+CC, AR and STRIP or other variables may also be necessary if defaults are not
+sufficient).
+
+* Cross-compiling on Unix/Linux (also includes Mac OS X) to Windows
+
+- To set up cross-compiling environment:
+1. Get the 'Cross-Hosted MinGW Build Tool' script from the MinGW download page
+   (http://sourceforge.net/project/showfiles.php?group_id=2435)
+	 Tested with x86-mingw32-build.sh-0.0-20061107-1
+2. Set the package versions in x86-mingw32-build.sh.conf, tested with:
+   GCC_VERSION                   3.4.5-20060117-1
+   BINUTILS_VERSION              2.18.50-20080109-2
+   RUNTIME_VERSION               3.14
+   W32API_VERSION                3.11
+3. Run the script to get and build cross-compiling environment
+
+- To compile simply do:
+
+make TARGET=/path/to/mingw/install/dir/bin/i386-mingw32
+
+* Cross-compiling on Cygwin to Windows
+
+To compile with the Cygwin compiler install the mingw versions from setup.exe
+and then you can issue the following command:
+
+make TARGET=mingw CC="gcc -mno-cygwin" AR=ar STRIP=strip

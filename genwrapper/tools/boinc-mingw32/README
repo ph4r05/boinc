@@ -1,0 +1,22 @@
+
+ 1.) Prerequisites
+ 
+ Debian 5.0
+ MinGW32 debian packages
+ BOINC 6 source
+
+
+ 2.) How to compile
+
+ To compile BOINC 6 with mingw32, use the following command 
+ (use the location of the BOINC 6 source for BOINCDIR):
+ 
+ $> make TARGET=i586-mingw32msvc BOINCDIR=../../../../boinc/boinc-6/
+	
+ This will produce a file "libboinc.a" which can be linked with
+ GenWrapper, and will copy the necessary header files into a directory
+ named include/ .
+ 
+
+ 
+ 
