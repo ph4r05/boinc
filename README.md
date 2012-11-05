@@ -11,10 +11,10 @@ Since standard wrapper is not flexible enough, it is preferable to use another o
 
 GenWrapper
 =====
-This is GenWrapper project clonned from http://genwrapper.sourceforge.net/
+This is GenWrapper project cloned from http://genwrapper.sourceforge.net/
 It is modified version of this projects, includes some fixes for problems that I experienced with compilation on linux & windows.
 
-It works to compile on linux and windows, with small fixes modifications. 
+It works to compile it on linux and windows, with small fixes modifications. 
 
 For detailed documentation about GenWrapper, please reffer to provided web page, or:
 http://indico.cern.ch/getFile.py/access?contribId=25&resId=1&materialId=slides&confId=56447
